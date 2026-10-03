@@ -1,0 +1,3168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Remix School of Fish AR - Spatial Oceanic Ecosystem & AI Naturalist</title>
+    <meta name="description" content="A dynamic multi-species school of fish with Google XR Blocks Spatial UI, World Sensing, Depth Occlusion, Spatial Anchors, and Gemini AI Voice Naturalist." />
+    <meta property="og:title" content="Remix School of Fish AR - Spatial Oceanic Ecosystem & AI Naturalist" />
+    <meta property="og:description" content="Next-level Mixed Reality oceanic ecosystem featuring per-pixel depth occlusion, persistent spatial anchors, tabletop coral reefs, dual 6DoF spatial consoles, and Gemini AI voice narration." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link type="text/css" rel="stylesheet" href="https://xrblocks.github.io/css/xr.css" />
+    <script>
+      window.litDisableBundleWarning = true;
+    </script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js",
+          "three/": "https://cdn.jsdelivr.net/npm/three@0.186.0/",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/",
+          "@pmndrs/uikit": "https://cdn.jsdelivr.net/npm/@pmndrs/uikit@1.0.64/dist/index.min.js",
+          "@pmndrs/uikit-pub-sub": "https://cdn.jsdelivr.net/npm/@pmndrs/uikit-pub-sub@1.0.64/dist/index.min.js",
+          "@pmndrs/msdfonts": "https://cdn.jsdelivr.net/npm/@pmndrs/msdfonts@1.0.64/dist/index.min.js",
+          "@preact/signals-core": "https://cdn.jsdelivr.net/npm/@preact/signals-core@1.14.0/dist/signals-core.mjs",
+          "yoga-layout/load": "https://cdn.jsdelivr.net/npm/yoga-layout@3.2.1/dist/src/load.js",
+          "lit": "https://esm.sh/lit@3.3.1",
+          "lit/": "https://esm.sh/lit@3.3.1/",
+          "xrblocks": "https://xrblocks.github.io/build/xrblocks.js",
+          "xrblocks/": "https://xrblocks.github.io/build/",
+          "@google/genai": "https://cdn.jsdelivr.net/npm/@google/genai/+esm",
+          "@dimforge/rapier3d-simd-compat": "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-simd-compat@0.19.2/rapier.mjs"
+        }
+      }
+    </script>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #030814;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        user-select: none;
+      }
+      
+      /* Sleek 2D Desktop / Mobile HUD Controls */
+      .hud-header {
+        position: absolute;
+        top: 16px;
+        left: 20px;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        pointer-events: auto;
+      }
+      .hud-title-lockup {
+        background: rgba(5, 14, 28, 0.82);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid rgba(147, 197, 253, 0.25);
+        padding: 10px 18px;
+        border-radius: 12px;
+        color: #f8fafc;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+      }
+      .hud-title {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 0;
+        color: #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .hud-subtitle {
+        font-size: 12px;
+        font-weight: 400;
+        color: #94a3b8;
+        margin-top: 3px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+      }
+      .tag-skill {
+        background: rgba(14, 165, 233, 0.2);
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        border-radius: 4px;
+        padding: 1px 6px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+      .tag-anchor {
+        background: rgba(168, 85, 247, 0.2);
+        color: #c084fc;
+        border: 1px solid rgba(192, 132, 252, 0.35);
+      }
+      
+      /* XR Hint Toast */
+      .xr-guidance-pill {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 9998;
+        background: rgba(6, 18, 34, 0.8);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(147, 197, 253, 0.24);
+        padding: 8px 14px;
+        border-radius: 9999px;
+        color: #e2e8f0;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        pointer-events: none;
+      }
+      .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background-color: #10b981;
+        box-shadow: 0 0 8px #10b981;
+      }
+      .status-dot.ai-thinking {
+        background-color: #38bdf8;
+        box-shadow: 0 0 10px #38bdf8;
+        animation: pulse-glow 1s infinite alternate;
+      }
+      .status-dot.ai-speaking {
+        background-color: #a855f7;
+        box-shadow: 0 0 12px #a855f7;
+        animation: pulse-glow 0.6s infinite alternate;
+      }
+      @keyframes pulse-glow {
+        0% { opacity: 0.4; }
+        100% { opacity: 1.0; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Camera Flash Effect Overlay -->
+    <div id="camera-flash-overlay" style="position:fixed;inset:0;background:#ffffff;opacity:0;pointer-events:none;z-index:99999;transition:opacity 0.12s ease;"></div>
+
+    <!-- Top Left Brand & Status -->
+    <div class="hud-header">
+      <div class="hud-title-lockup">
+        <h1 class="hud-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.47-3.44 6-7 6s-7.56-2.53-8.5-6Z"/>
+            <path d="M18 12v.5"/>
+            <path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/>
+            <path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 5 .5 6.5-1.5 1.5-1.5 5-.5 6.5 2.85-.47 4.27-2.5 4.27-5.17"/>
+          </svg>
+          Remix School of Fish AR
+        </h1>
+        <div class="hud-subtitle">
+          <span class="tag-skill">Depth Occlusion</span>
+          <span class="tag-skill tag-anchor">Spatial Anchors</span>
+          <span class="tag-skill">Voice AI</span>
+          <span>·</span>
+          <span id="active-mode-label">Mode: Feeding</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Right Guidance -->
+    <div class="xr-guidance-pill">
+      <span id="ai-status-indicator" class="status-dot"></span>
+      <span id="hud-xr-tip">Depth Occlusion Active · Pin Anchors · Voice Narration Ready</span>
+    </div>
+
+
+
+    <!-- Main Module Script -->
+    <script type="module">
+      import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js';
+      import * as xb from 'https://xrblocks.github.io/build/xrblocks.js';
+      import { GoogleGenAI } from 'https://cdn.jsdelivr.net/npm/@google/genai/+esm';
+
+      // ==========================================
+      // 1. Web Audio Procedural Marine Soundscape
+      // ==========================================
+      class OceanAudioEngine {
+        constructor() {
+          this.ctx = null;
+          this.muted = false;
+          this.ambientGain = null;
+          this.isInitialized = false;
+        }
+
+        init() {
+          if (this.isInitialized) return;
+          try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioContext();
+
+            this.masterGain = this.ctx.createGain();
+            this.masterGain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+            this.masterGain.connect(this.ctx.destination);
+
+            this.ambientGain = this.ctx.createGain();
+            this.ambientGain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+
+            const osc1 = this.ctx.createOscillator();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(55, this.ctx.currentTime);
+            
+            const osc2 = this.ctx.createOscillator();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(58, this.ctx.currentTime);
+
+            const lpf = this.ctx.createBiquadFilter();
+            lpf.type = 'lowpass';
+            lpf.frequency.setValueAtTime(180, this.ctx.currentTime);
+
+            osc1.connect(lpf);
+            osc2.connect(lpf);
+            lpf.connect(this.ambientGain);
+            this.ambientGain.connect(this.masterGain);
+
+            osc1.start();
+            osc2.start();
+
+            this.isInitialized = true;
+          } catch (e) {
+            console.warn('Web Audio pending user gesture', e);
+          }
+        }
+
+        updateListenerPose(pos, forward, up) {
+          if (!this.isInitialized || !this.ctx || !this.ctx.listener) return;
+          const l = this.ctx.listener;
+          const t = this.ctx.currentTime;
+          if (l.positionX) {
+            l.positionX.setValueAtTime(pos.x, t);
+            l.positionY.setValueAtTime(pos.y, t);
+            l.positionZ.setValueAtTime(pos.z, t);
+            if (forward && up) {
+              l.forwardX.setValueAtTime(forward.x, t);
+              l.forwardY.setValueAtTime(forward.y, t);
+              l.forwardZ.setValueAtTime(forward.z, t);
+              l.upX.setValueAtTime(up.x, t);
+              l.upY.setValueAtTime(up.y, t);
+              l.upZ.setValueAtTime(up.z, t);
+            }
+          } else if (l.setPosition) {
+            l.setPosition(pos.x, pos.y, pos.z);
+            if (forward && up) {
+              l.setOrientation(forward.x, forward.y, forward.z, up.x, up.y, up.z);
+            }
+          }
+        }
+
+        createPanner(pos) {
+          if (!this.isInitialized || !this.ctx || !pos) return this.masterGain;
+          try {
+            const panner = this.ctx.createPanner();
+            panner.panningModel = 'HRTF';
+            panner.distanceModel = 'inverse';
+            panner.refDistance = 0.8;
+            panner.maxDistance = 18;
+            panner.rolloffFactor = 1.1;
+            const t = this.ctx.currentTime;
+            if (panner.positionX) {
+              panner.positionX.setValueAtTime(pos.x, t);
+              panner.positionY.setValueAtTime(pos.y, t);
+              panner.positionZ.setValueAtTime(pos.z, t);
+            } else if (panner.setPosition) {
+              panner.setPosition(pos.x, pos.y, pos.z);
+            }
+            panner.connect(this.masterGain);
+            return panner;
+          } catch(e) {
+            return this.masterGain;
+          }
+        }
+
+        toggleMute() {
+          if (!this.isInitialized) {
+            this.init();
+            return false;
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+          }
+          this.muted = !this.muted;
+          if (this.masterGain) {
+            this.masterGain.gain.setTargetAtTime(this.muted ? 0.0 : 0.3, this.ctx.currentTime, 0.05);
+          }
+          return this.muted;
+        }
+
+        playBubblePop(pitchMod = 1.0, pos = null) {
+          if (!this.isInitialized || this.muted) return;
+          try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            const startFreq = (350 + Math.random() * 200) * pitchMod;
+            osc.frequency.setValueAtTime(startFreq, now);
+            osc.frequency.exponentialRampToValueAtTime(startFreq * 2.2, now + 0.06);
+
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+            const dest = this.createPanner(pos);
+            osc.connect(gain);
+            gain.connect(dest);
+            osc.start(now);
+            osc.stop(now + 0.09);
+          } catch(e) {}
+        }
+
+        playFeedPellet(pos = null) {
+          if (!this.isInitialized || this.muted) return;
+          try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(650, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+            const dest = this.createPanner(pos);
+            osc.connect(gain);
+            gain.connect(dest);
+            osc.start(now);
+            osc.stop(now + 0.16);
+          } catch(e) {}
+        }
+
+        playAttractTone() {
+          if (!this.isInitialized || this.muted) return;
+          try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(432, now);
+            osc.frequency.exponentialRampToValueAtTime(520, now + 0.25);
+
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(now);
+            osc.stop(now + 0.32);
+          } catch(e) {}
+        }
+
+        playScatterWhoosh(pos = null) {
+          if (!this.isInitialized || this.muted) return;
+          try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(140, now);
+            osc.frequency.exponentialRampToValueAtTime(60, now + 0.35);
+
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+            const dest = this.createPanner(pos);
+            osc.connect(gain);
+            gain.connect(dest);
+            osc.start(now);
+            osc.stop(now + 0.42);
+          } catch(e) {}
+        }
+
+        playChimeAI() {
+          if (!this.isInitialized || this.muted) return;
+          try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(587.33, now); // D5
+            osc.frequency.exponentialRampToValueAtTime(880.00, now + 0.18); // A5
+
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(now);
+            osc.stop(now + 0.36);
+          } catch(e) {}
+        }
+
+        playAnchorLock() {
+          if (!this.isInitialized || this.muted) return;
+          try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(329.63, now); // E4
+            osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.15); // E5
+
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(now);
+            osc.stop(now + 0.30);
+          } catch(e) {}
+        }
+
+        playTargetLockBeep() {
+          if (!this.isInitialized || this.muted) return;
+          try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(1174.66, now); // D6
+            osc.frequency.setValueAtTime(1760.00, now + 0.04); // A6
+
+            gain.gain.setValueAtTime(0.08, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            osc.start(now);
+            osc.stop(now + 0.13);
+          } catch(e) {}
+        }
+
+        playCameraShutter() {
+          if (!this.isInitialized || this.muted) return;
+          try {
+            const now = this.ctx.currentTime;
+            // Mechanical iris click (filtered noise burst)
+            const bufferSize = this.ctx.sampleRate * 0.08;
+            const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+              output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
+            }
+            const noise = this.ctx.createBufferSource();
+            noise.buffer = noiseBuffer;
+
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(2400, now);
+            filter.Q.setValueAtTime(3.0, now);
+
+            const gain = this.ctx.createGain();
+            gain.gain.setValueAtTime(0.35, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.masterGain);
+            noise.start(now);
+
+            // Shutter mirror recoil tone
+            const osc = this.ctx.createOscillator();
+            const oscGain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(90, now + 0.14);
+            oscGain.gain.setValueAtTime(0.2, now);
+            oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+            osc.connect(oscGain);
+            oscGain.connect(this.masterGain);
+            osc.start(now);
+            osc.stop(now + 0.16);
+          } catch(e) {}
+        }
+      }
+
+      const audioEngine = new OceanAudioEngine();
+      window.addEventListener('pointerdown', () => audioEngine.init(), { once: true });
+
+      // ========================================================
+      // 2. Naturalist Voice Narration Engine (xb-add-ai Skill)
+      // ========================================================
+      class NaturalistVoiceEngine {
+        constructor() {
+          this.enabled = true;
+          this.synth = window.speechSynthesis || null;
+          this.currentUtterance = null;
+          this.isSpeaking = false;
+        }
+
+        speak(text) {
+          if (!this.enabled || !this.synth) return;
+          this.stop();
+
+          const cleanText = text.replace(/^Dr\.\s*Marina\s*Thorne:\s*/i, '');
+          const utterance = new SpeechSynthesisUtterance(cleanText);
+          utterance.rate = 1.02;
+          utterance.pitch = 1.05;
+
+          const voices = this.synth.getVoices();
+          const femaleEnVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Female') || v.name.includes('Samantha') || v.name.includes('Natural') || v.name.includes('Google')));
+          if (femaleEnVoice) utterance.voice = femaleEnVoice;
+
+          const statusDot = document.getElementById('ai-status-indicator');
+
+          utterance.onstart = () => {
+            this.isSpeaking = true;
+            if (statusDot) statusDot.classList.add('ai-speaking');
+          };
+
+          utterance.onend = () => {
+            this.isSpeaking = false;
+            if (statusDot) statusDot.classList.remove('ai-speaking');
+          };
+
+          utterance.onerror = () => {
+            this.isSpeaking = false;
+            if (statusDot) statusDot.classList.remove('ai-speaking');
+          };
+
+          this.currentUtterance = utterance;
+          this.synth.speak(utterance);
+        }
+
+        stop() {
+          if (this.synth && this.synth.speaking) {
+            this.synth.cancel();
+          }
+          this.isSpeaking = false;
+          const statusDot = document.getElementById('ai-status-indicator');
+          if (statusDot) statusDot.classList.remove('ai-speaking');
+        }
+
+        toggle() {
+          this.enabled = !this.enabled;
+          if (!this.enabled) this.stop();
+          return this.enabled;
+        }
+      }
+
+      const naturalistVoice = new NaturalistVoiceEngine();
+
+      // ====================================================
+      // 3. Multi-Species 3D Geometry (Mackerel & Coral Tang)
+      // ====================================================
+      function createMackerelGeometry() {
+        const geo = new THREE.BufferGeometry();
+        const vertices = [];
+        const normals = [];
+        const uvs = [];
+        const indices = [];
+        const aTailFactor = [];
+        const aFinFactor = [];
+
+        function addV(x, y, z, nx, ny, nz, u, v, tailWeight, finWeight) {
+          vertices.push(x, y, z);
+          normals.push(nx, ny, nz);
+          uvs.push(u, v);
+          aTailFactor.push(tailWeight);
+          aFinFactor.push(finWeight);
+          return (vertices.length / 3) - 1;
+        }
+
+        const rings = [
+          { z:  0.18, rx: 0.007, ry: 0.007, tail: 0.0 },
+          { z:  0.12, rx: 0.024, ry: 0.038, tail: 0.05 },
+          { z:  0.03, rx: 0.035, ry: 0.054, tail: 0.15 },
+          { z: -0.06, rx: 0.026, ry: 0.042, tail: 0.45 },
+          { z: -0.15, rx: 0.010, ry: 0.016, tail: 0.80 },
+        ];
+
+        const segs = 8;
+        const ringIdxs = [];
+        for (let r = 0; r < rings.length; r++) {
+          const ring = rings[r];
+          const curr = [];
+          for (let s = 0; s < segs; s++) {
+            const angle = (s / segs) * Math.PI * 2;
+            const x = Math.sin(angle) * ring.rx;
+            const y = Math.cos(angle) * ring.ry;
+            const norm = new THREE.Vector3(x, y, 0).normalize();
+            const idx = addV(x, y, ring.z, norm.x, norm.y, norm.z, s / segs, r / (rings.length - 1), ring.tail, 0.0);
+            curr.push(idx);
+          }
+          ringIdxs.push(curr);
+        }
+
+        for (let r = 0; r < rings.length - 1; r++) {
+          const curr = ringIdxs[r];
+          const next = ringIdxs[r + 1];
+          for (let s = 0; s < segs; s++) {
+            const sNext = (s + 1) % segs;
+            indices.push(curr[s], next[s], next[sNext]);
+            indices.push(curr[s], next[sNext], curr[sNext]);
+          }
+        }
+
+        // Snout with jaw cleft
+        const snout = addV(0, -0.003, 0.21, 0, 0, 1, 0.5, 0, 0.0, 0.0);
+        for (let s = 0; s < segs; s++) {
+          const sNext = (s + 1) % segs;
+          indices.push(snout, ringIdxs[0][sNext], ringIdxs[0][s]);
+        }
+
+        // Sculpted 3D Corneal Eyes
+        const eyeL = addV( 0.032, 0.012, 0.13,  1, 0.2, 0.2, 0.2, 0.2, 0.02, 0.0);
+        const eyeR = addV(-0.032, 0.012, 0.13, -1, 0.2, 0.2, 0.8, 0.2, 0.02, 0.0);
+        indices.push(ringIdxs[0][2], eyeL, ringIdxs[1][2]);
+        indices.push(ringIdxs[0][2], ringIdxs[1][2], eyeL);
+        indices.push(ringIdxs[0][6], eyeR, ringIdxs[1][6]);
+        indices.push(ringIdxs[0][6], ringIdxs[1][6], eyeR);
+
+        // Segmented Caudal Fin Rays
+        const ped = ringIdxs[rings.length - 1];
+        const tfTop = addV(0,  0.082, -0.27, 0, 1, 0, 1, 1, 1.0, 1.0);
+        const tfMidT = addV(0, 0.035, -0.25, 0, 0.5, -0.5, 1, 0.75, 1.0, 0.9);
+        const tfMid = addV(0,  0.000, -0.22, 0, 0, -1, 1, 0.5, 1.0, 0.7);
+        const tfMidB = addV(0,-0.035, -0.25, 0,-0.5, -0.5, 1, 0.25, 1.0, 0.9);
+        const tfBot = addV(0, -0.072, -0.27, 0, -1, 0, 1, 0, 1.0, 1.0);
+
+        indices.push(ped[0], tfTop, tfMidT, ped[0], tfMidT, tfTop);
+        indices.push(ped[0], tfMidT, tfMid, ped[0], tfMid, tfMidT);
+        indices.push(ped[4], tfMid, tfMidB, ped[4], tfMidB, tfMid);
+        indices.push(ped[4], tfMidB, tfBot, ped[4], tfBot, tfMidB);
+
+        // Segmented Dorsal Fin Rays
+        const dfTip1 = addV(0, 0.098, -0.01, 0, 1, 0, 0.5, 1, 0.25, 1.0);
+        const dfTip2 = addV(0, 0.078, -0.06, 0, 1, 0, 0.5, 1, 0.40, 1.0);
+        indices.push(ringIdxs[1][0], dfTip1, ringIdxs[2][0]);
+        indices.push(ringIdxs[1][0], ringIdxs[2][0], dfTip1);
+        indices.push(ringIdxs[2][0], dfTip1, dfTip2);
+        indices.push(ringIdxs[2][0], dfTip2, dfTip1);
+        indices.push(ringIdxs[2][0], dfTip2, ringIdxs[3][0]);
+        indices.push(ringIdxs[2][0], ringIdxs[3][0], dfTip2);
+
+        // Segmented Pectoral Fins
+        const pfL1 = addV( 0.09, -0.015, 0.02,  1, 0, 0, 1, 0, 0.15, 0.85);
+        const pfL2 = addV( 0.075,-0.030, -0.02, 1, 0, 0, 1, 0, 0.25, 0.95);
+        indices.push(ringIdxs[2][2], pfL1, pfL2);
+        indices.push(ringIdxs[2][2], pfL2, ringIdxs[3][2]);
+
+        const pfR1 = addV(-0.09, -0.015, 0.02, -1, 0, 0, 0, 0, 0.15, 0.85);
+        const pfR2 = addV(-0.075,-0.030, -0.02,-1, 0, 0, 0, 0, 0.25, 0.95);
+        indices.push(ringIdxs[2][6], pfR2, pfR1);
+        indices.push(ringIdxs[2][6], ringIdxs[3][6], pfR2);
+
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        geo.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+        geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+        geo.setAttribute('aTailFactor', new THREE.Float32BufferAttribute(aTailFactor, 1));
+        geo.setAttribute('aFinFactor', new THREE.Float32BufferAttribute(aFinFactor, 1));
+        geo.setIndex(indices);
+        geo.computeVertexNormals();
+        return geo;
+      }
+
+      function createCoralTangGeometry() {
+        const geo = new THREE.BufferGeometry();
+        const vertices = [];
+        const normals = [];
+        const uvs = [];
+        const indices = [];
+        const aTailFactor = [];
+        const aFinFactor = [];
+
+        function addV(x, y, z, nx, ny, nz, u, v, tailWeight, finWeight) {
+          vertices.push(x, y, z);
+          normals.push(nx, ny, nz);
+          uvs.push(u, v);
+          aTailFactor.push(tailWeight);
+          aFinFactor.push(finWeight);
+          return (vertices.length / 3) - 1;
+        }
+
+        const rings = [
+          { z:  0.15, rx: 0.006, ry: 0.009, tail: 0.0 },
+          { z:  0.09, rx: 0.020, ry: 0.052, tail: 0.05 },
+          { z:  0.00, rx: 0.027, ry: 0.088, tail: 0.20 },
+          { z: -0.07, rx: 0.020, ry: 0.066, tail: 0.50 },
+          { z: -0.14, rx: 0.009, ry: 0.022, tail: 0.85 },
+        ];
+
+        const segs = 8;
+        const ringIdxs = [];
+        for (let r = 0; r < rings.length; r++) {
+          const ring = rings[r];
+          const curr = [];
+          for (let s = 0; s < segs; s++) {
+            const angle = (s / segs) * Math.PI * 2;
+            const x = Math.sin(angle) * ring.rx;
+            const y = Math.cos(angle) * ring.ry;
+            const norm = new THREE.Vector3(x, y, 0).normalize();
+            const idx = addV(x, y, ring.z, norm.x, norm.y, norm.z, s / segs, r / (rings.length - 1), ring.tail, 0.0);
+            curr.push(idx);
+          }
+          ringIdxs.push(curr);
+        }
+
+        for (let r = 0; r < rings.length - 1; r++) {
+          const curr = ringIdxs[r];
+          const next = ringIdxs[r + 1];
+          for (let s = 0; s < segs; s++) {
+            const sNext = (s + 1) % segs;
+            indices.push(curr[s], next[s], next[sNext]);
+            indices.push(curr[s], next[sNext], curr[sNext]);
+          }
+        }
+
+        // Snout with high cranial ridge
+        const snout = addV(0, -0.012, 0.18, 0, 0, 1, 0.5, 0, 0.0, 0.0);
+        for (let s = 0; s < segs; s++) {
+          const sNext = (s + 1) % segs;
+          indices.push(snout, ringIdxs[0][sNext], ringIdxs[0][s]);
+        }
+
+        // Tang 3D Corneal Eyes
+        const eyeL = addV( 0.026, 0.022, 0.10,  1, 0.3, 0.1, 0.2, 0.2, 0.03, 0.0);
+        const eyeR = addV(-0.026, 0.022, 0.10, -1, 0.3, 0.1, 0.8, 0.2, 0.03, 0.0);
+        indices.push(ringIdxs[0][2], eyeL, ringIdxs[1][2]);
+        indices.push(ringIdxs[0][2], ringIdxs[1][2], eyeL);
+        indices.push(ringIdxs[0][6], eyeR, ringIdxs[1][6]);
+        indices.push(ringIdxs[0][6], ringIdxs[1][6], eyeR);
+
+        // Segmented Caudal Fin
+        const ped = ringIdxs[rings.length - 1];
+        const tfTop = addV(0,  0.075, -0.23, 0, 1, 0, 1, 1, 1.0, 1.0);
+        const tfMidT = addV(0, 0.030, -0.25, 0, 0.5, -0.5, 1, 0.75, 1.0, 0.9);
+        const tfMid = addV(0,  0.000, -0.25, 0, 0,-1, 1, 0.5, 1.0, 0.8);
+        const tfMidB = addV(0,-0.030, -0.25, 0,-0.5, -0.5, 1, 0.25, 1.0, 0.9);
+        const tfBot = addV(0, -0.075, -0.23, 0,-1, 0, 1, 0, 1.0, 1.0);
+
+        indices.push(ped[0], tfTop, tfMidT, ped[0], tfMidT, tfTop);
+        indices.push(ped[0], tfMidT, tfMid, ped[0], tfMid, tfMidT);
+        indices.push(ped[4], tfMid, tfMidB, ped[4], tfMidB, tfMid);
+        indices.push(ped[4], tfMidB, tfBot, ped[4], tfBot, tfMidB);
+
+        // High Dorsal Crest Rays
+        const crest1 = addV(0, 0.138,  0.02, 0, 1, 0, 0.5, 1, 0.2, 1.0);
+        const crest2 = addV(0, 0.124, -0.05, 0, 1, 0, 0.5, 1, 0.4, 1.0);
+        indices.push(ringIdxs[1][0], crest1, ringIdxs[2][0]);
+        indices.push(ringIdxs[1][0], ringIdxs[2][0], crest1);
+        indices.push(ringIdxs[2][0], crest1, crest2);
+        indices.push(ringIdxs[2][0], crest2, crest1);
+        indices.push(ringIdxs[2][0], crest2, ringIdxs[3][0]);
+        indices.push(ringIdxs[2][0], ringIdxs[3][0], crest2);
+
+        // Ventral Anal Spine
+        const spineV = addV(0, -0.128, 0.00, 0, -1, 0, 0.5, 0, 0.2, 1.0);
+        indices.push(ringIdxs[2][4], spineV, ringIdxs[3][4]);
+        indices.push(ringIdxs[2][4], ringIdxs[3][4], spineV);
+
+        geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+        geo.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(normals), 3));
+        geo.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
+        geo.setAttribute('aTailFactor', new THREE.BufferAttribute(new Float32Array(aTailFactor), 1));
+        geo.setAttribute('aFinFactor', new THREE.BufferAttribute(new Float32Array(aFinFactor), 1));
+        geo.setIndex(indices);
+        geo.computeVertexNormals();
+        return geo;
+      }
+
+      // ==========================================
+      // 4. PBR Iridescent Scale Shader Material
+      // ==========================================
+      function createPbrIridescentFishMaterial(speciesType = 0.0) {
+        const material = new THREE.MeshStandardMaterial({
+          roughness: 0.24,
+          metalness: 0.38,
+          side: THREE.DoubleSide
+        });
+
+        material.userData.shader = null;
+        material.onBeforeCompile = (shader) => {
+          shader.uniforms.uTime = { value: 0 };
+          shader.uniforms.uCausticsStrength = { value: 0.45 };
+          shader.uniforms.uBiolumGlow = { value: 0.0 };
+          shader.uniforms.uSpeciesType = { value: speciesType };
+
+          shader.vertexShader = `
+            uniform float uTime;
+            attribute float aTailFactor;
+            attribute float aFinFactor;
+            attribute float aInstanceSpeed;
+            attribute float aInstancePhase;
+            varying vec2 vFishUv;
+            varying float vFinWeight;
+          ` + shader.vertexShader;
+
+          shader.vertexShader = shader.vertexShader.replace(
+            '#include <begin_vertex>',
+            `
+            #include <begin_vertex>
+            vFishUv = uv;
+            vFinWeight = aFinFactor;
+            float swimFreq = 8.5 + aInstanceSpeed * 5.0;
+            float wave1 = sin(uTime * swimFreq + aInstancePhase + position.z * 16.0) * (aTailFactor * 0.042);
+            float wave2 = sin(uTime * swimFreq * 1.8 + aInstancePhase + position.z * 22.0) * (pow(aTailFactor, 2.0) * 0.016);
+            float finFlutter = sin(uTime * 26.0 + aInstancePhase) * (aFinFactor * 0.015);
+            transformed.x += wave1 + wave2 + finFlutter;
+            `
+          );
+
+          shader.fragmentShader = `
+            uniform float uTime;
+            uniform float uCausticsStrength;
+            uniform float uBiolumGlow;
+            uniform float uSpeciesType;
+            varying vec2 vFishUv;
+            varying float vFinWeight;
+          ` + shader.fragmentShader;
+
+          shader.fragmentShader = shader.fragmentShader.replace(
+            '#include <dithering_fragment>',
+            `
+            #include <dithering_fragment>
+            vec3 vDir = normalize(vViewPosition);
+
+            // Procedural Micro-Scale Rhomboid Ctenoid Bump
+            vec2 scUv = vFishUv * vec2(55.0, 18.0);
+            float bump = sin(scUv.x + scUv.y) * cos(scUv.x - scUv.y) * 0.32;
+            vec3 microNormal = normalize(vNormal + vec3(bump * 0.12 * (1.0 - vFinWeight), bump * 0.12 * (1.0 - vFinWeight), 0.0));
+
+            float NdotV = max(dot(microNormal, vDir), 0.0);
+            float fresnel = pow(1.0 - NdotV, 2.5);
+
+            vec3 spectralColor = 0.5 + 0.5 * cos(6.28318 * (fresnel * 1.7 + vec3(0.0, 0.33, 0.67)));
+            gl_FragColor.rgb = mix(gl_FragColor.rgb, gl_FragColor.rgb * spectralColor * 1.6, 0.42);
+
+            // Subsurface Scattering (SSS) Fin Translucency
+            if (vFinWeight > 0.15) {
+              vec3 sunDir = normalize(vec3(0.2, 0.85, 0.3));
+              float sss = pow(clamp(dot(-vDir, sunDir), 0.0, 1.0), 2.8) * vFinWeight;
+              vec3 sssTint = (uSpeciesType < 0.5) ? vec3(0.4, 0.9, 1.0) : vec3(1.0, 0.75, 0.25);
+              gl_FragColor.rgb += sssTint * sss * 0.75;
+            }
+
+            // Animated Refracted Water Caustics
+            vec3 vPos = vViewPosition;
+            float c1 = sin(vPos.x * 4.2 + uTime * 1.5) * cos(vPos.z * 4.2 + uTime * 1.2);
+            float c2 = cos(vPos.x * 6.8 - uTime * 2.0) * sin(vPos.z * 5.5 + uTime * 1.6);
+            float caustic = clamp((c1 + c2) * 0.5 + 0.35, 0.0, 1.0);
+            gl_FragColor.rgb += vec3(0.25, 0.85, 1.0) * caustic * uCausticsStrength;
+
+            // Bioluminescent Glow
+            if (uBiolumGlow > 0.01) {
+              vec3 bioGlow = (uSpeciesType < 0.5) ? vec3(0.0, 0.95, 0.85) : vec3(1.0, 0.6, 0.1);
+              gl_FragColor.rgb += bioGlow * uBiolumGlow * 0.6;
+            }
+            `
+          );
+
+          material.userData.shader = shader;
+        };
+
+        return material;
+      }
+
+      // ========================================================
+      // 5. Gemini Marine Naturalist AI Agent (xb-add-ai Skill)
+      // ========================================================
+      class MarineNaturalistAgent {
+        constructor() {
+          const apiKey = (typeof process !== 'undefined' && process.env && process.env.GEMINI_API_KEY) || '';
+          this.ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
+          this.isBusy = false;
+        }
+
+        async queryNaturalist(prompt, telemetry) {
+          if (this.isBusy) return "Dr. Marina Thorne is currently observing a schooling maneuver. Please ask again in a moment.";
+          this.isBusy = true;
+          
+          const statusDot = document.getElementById('ai-status-indicator');
+          if (statusDot) statusDot.classList.add('ai-thinking');
+
+          audioEngine.playChimeAI();
+
+          let answer = '';
+          try {
+            if (this.ai) {
+              const response = await this.ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: `You are Dr. Marina Thorne, Chief Marine Naturalist and Ichthyologist.
+You are observing a live Mixed Reality ocean ecosystem with the user.
+Here is the current live telemetry of the ecosystem:
+${JSON.stringify(telemetry, null, 2)}
+
+User question: "${prompt}"
+
+Provide a scientific, engaging, and friendly explanation in 2-3 sentences. Cite specific biological adaptations (e.g. lateral line sensations, thin-film scale iridescence, or schooling hydrodynamic slipstreams).`
+              });
+              answer = response.text;
+            } else {
+              answer = this.getExpertKnowledgeAnswer(prompt, telemetry);
+            }
+          } catch (err) {
+            console.warn('Gemini query fallback:', err);
+            answer = this.getExpertKnowledgeAnswer(prompt, telemetry);
+          } finally {
+            this.isBusy = false;
+            if (statusDot) statusDot.classList.remove('ai-thinking');
+          }
+
+          // Voice narration delivery
+          naturalistVoice.speak(answer);
+
+          return answer;
+        }
+
+        getExpertKnowledgeAnswer(prompt, telemetry) {
+          const p = prompt.toLowerCase();
+          if (p.includes('school') || p.includes('ball') || p.includes('flock')) {
+            return `Dr. Marina Thorne: Fish synchronize via their lateral line organ, which detects micro-pressure fluctuations from neighboring fins. In our active school of ${telemetry.population} fish, this tight cohesion creates the predator confusion effect while drastically reducing hydrodynamic drag through fluid vortices.`;
+          }
+          if (p.includes('iridescen') || p.includes('scale') || p.includes('color') || p.includes('shimmer')) {
+            return `Dr. Marina Thorne: Mackerel and Tang scales utilize layered microscopic guanine crystal platelets. As sunlight penetrates this ${telemetry.biome}, constructive optical interference shifts reflected wavelengths based on viewing angle, creating dynamic countershading camouflage.`;
+          }
+          if (p.includes('tang') || p.includes('diet') || p.includes('reef') || p.includes('table')) {
+            return `Dr. Marina Thorne: Coral Tangs are crucial herbivores in this lagoon. They forage across our detected tabletop coral reefs, grazing micro-algae to maintain healthy polyps and defending reef boundaries from fast roving oceanic predators.`;
+          }
+          if (p.includes('shark') || p.includes('predator') || p.includes('vacuole') || p.includes('evasion')) {
+            return `Dr. Marina Thorne: When the Blacktip Reef Shark attacks, fish execute an explosive 'flash expansion' accelerating outward in milliseconds, followed by a 'vacuole maneuver' where the school parts around the shark's head and recombines seamlessly in its wake to disorient the predator!`;
+          }
+          if (p.includes('night') || p.includes('torch') || p.includes('flashlight') || p.includes('biolum')) {
+            return `Dr. Marina Thorne: In our Night Dive mode, marine life utilizes luciferin-luciferase enzymatic luminescence. Shining your dive flashlight excites fluorescence in coral polyps and illuminates micro-plankton suspended in the current.`;
+          }
+          if (p.includes('speed') || p.includes('swim') || p.includes('fast')) {
+            return `Dr. Marina Thorne: Oceanic Mackerels possess a fusiform torpedo morphology capable of sustained high velocities (currently clocked at ${telemetry.cruiseSpeed}). Their stiff caudal fin acts as a hydrofoil, allowing rapid darting toward nutrient pellets.`;
+          }
+          return `Dr. Marina Thorne: Fascinating observation! In this ${telemetry.biome} habitat, our ${telemetry.population} specimen community exhibits high bio-responsiveness. Real-world surfaces serve as anchor reefs while natural fluid boundaries steer the school seamlessly.`;
+        }
+      }
+
+      const naturalistAgent = new MarineNaturalistAgent();
+
+      // ========================================================
+      // 5B. Real-Time Voice Speech-to-Text (STT) Microphone Engine
+      // ========================================================
+      class NaturalistSpeechInput {
+        constructor() {
+          this.isListening = false;
+          const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+          if (SpeechRec) {
+            this.rec = new SpeechRec();
+            this.rec.continuous = false;
+            this.rec.interimResults = false;
+            this.rec.lang = 'en-US';
+
+            this.rec.onresult = (e) => {
+              if (e.results && e.results[0] && e.results[0][0]) {
+                const transcript = e.results[0][0].transcript;
+                const tip = document.getElementById('hud-xr-tip');
+                if (tip) tip.textContent = `🎤 Heard: "${transcript}"`;
+                window.askNaturalist(transcript);
+              }
+            };
+            this.rec.onstart = () => {
+              this.isListening = true;
+              this.updateUI(true);
+            };
+            this.rec.onend = () => {
+              this.isListening = false;
+              this.updateUI(false);
+            };
+            this.rec.onerror = (err) => {
+              console.warn('Speech recognition error:', err);
+              this.isListening = false;
+              this.updateUI(false);
+            };
+          } else {
+            this.rec = null;
+          }
+        }
+
+        toggle() {
+          if (!this.rec) {
+            const tip = document.getElementById('hud-xr-tip');
+            if (tip) tip.textContent = 'Voice input not supported in this browser; click quick prompts!';
+            return false;
+          }
+          if (this.isListening) {
+            this.rec.stop();
+            this.isListening = false;
+            this.updateUI(false);
+          } else {
+            try {
+              this.rec.start();
+              this.isListening = true;
+              this.updateUI(true);
+            } catch(e) {
+              console.warn(e);
+            }
+          }
+          return this.isListening;
+        }
+
+        updateUI(active) {
+          const btn = document.getElementById('btn-mic-toggle');
+          if (btn) {
+            btn.classList.toggle('active', active);
+            btn.style.color = active ? '#ef4444' : '#38bdf8';
+            btn.style.borderColor = active ? 'rgba(239, 68, 68, 0.7)' : 'rgba(56, 189, 248, 0.45)';
+          }
+          const tip = document.getElementById('hud-xr-tip');
+          if (tip && active) {
+            tip.textContent = '🎤 Listening... Ask Dr. Marina Thorne your marine question!';
+          }
+        }
+      }
+
+      const naturalistMic = new NaturalistSpeechInput();
+
+      // ========================================================
+      // 6. Procedural Tabletop Coral Reefs (xb-add-world-sensing)
+      // ========================================================
+      class TabletopReefSystem extends THREE.Group {
+        constructor() {
+          super();
+          this.kelpFronds = [];
+          this.buildReefStructures();
+        }
+
+        buildReefStructures() {
+          const reefMatSand = new THREE.MeshStandardMaterial({
+            color: 0x224c6d,
+            roughness: 0.7,
+            metalness: 0.1
+          });
+
+          const coralCoralMat = new THREE.MeshStandardMaterial({
+            color: 0xf43f5e,
+            roughness: 0.4,
+            metalness: 0.2
+          });
+
+          const coralCyanMat = new THREE.MeshStandardMaterial({
+            color: 0x06b6d4,
+            roughness: 0.3,
+            metalness: 0.2,
+            emissive: 0x0891b2,
+            emissiveIntensity: 0.3
+          });
+
+          const coralGoldMat = new THREE.MeshStandardMaterial({
+            color: 0xf59e0b,
+            roughness: 0.5,
+            metalness: 0.1
+          });
+
+          // Table Reef A: Left Table at (-1.7, -0.55, -1.8)
+          const tableA = new THREE.Group();
+          tableA.position.set(-1.7, -0.55, -1.8);
+
+          const slabA = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.75, 0.08, 16), reefMatSand);
+          tableA.add(slabA);
+
+          for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2;
+            const dist = 0.25 + Math.random() * 0.25;
+            const h = 0.15 + Math.random() * 0.2;
+            const cMesh = new THREE.Mesh(new THREE.ConeGeometry(0.08, h, 8), (i % 2 === 0) ? coralCyanMat : coralCoralMat);
+            cMesh.position.set(Math.cos(angle) * dist, h * 0.5, Math.sin(angle) * dist);
+            cMesh.rotation.z = (Math.random() - 0.5) * 0.3;
+            tableA.add(cMesh);
+          }
+
+          // Wavy kelp stalks
+          for (let k = 0; k < 4; k++) {
+            const stalk = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.015, 0.02, 0.7, 8),
+              new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.5 })
+            );
+            stalk.position.set((Math.random() - 0.5) * 0.5, 0.35, (Math.random() - 0.5) * 0.5);
+            tableA.add(stalk);
+            this.kelpFronds.push(stalk);
+          }
+
+          this.add(tableA);
+
+          // Table Reef B: Right Table at (1.7, -0.55, -1.8)
+          const tableB = new THREE.Group();
+          tableB.position.set(1.7, -0.55, -1.8);
+
+          const slabB = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.75, 0.08, 16), reefMatSand);
+          tableB.add(slabB);
+
+          for (let i = 0; i < 6; i++) {
+            const angle = (i / 6) * Math.PI * 2;
+            const dist = 0.25 + Math.random() * 0.25;
+            const h = 0.16 + Math.random() * 0.18;
+            const cMesh = new THREE.Mesh(new THREE.DodecahedronGeometry(0.12), (i % 2 === 0) ? coralGoldMat : coralCoralMat);
+            cMesh.position.set(Math.cos(angle) * dist, 0.1, Math.sin(angle) * dist);
+            cMesh.scale.set(1.0, 1.4, 1.0);
+            tableB.add(cMesh);
+          }
+
+          for (let k = 0; k < 4; k++) {
+            const stalk = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.015, 0.02, 0.7, 8),
+              new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.5 })
+            );
+            stalk.position.set((Math.random() - 0.5) * 0.5, 0.35, (Math.random() - 0.5) * 0.5);
+            tableB.add(stalk);
+            this.kelpFronds.push(stalk);
+          }
+
+          this.add(tableB);
+
+          this.tableCentres = [
+            new THREE.Vector3(-1.7, -0.55, -1.8),
+            new THREE.Vector3(1.7, -0.55, -1.8)
+          ];
+        }
+
+        update(t) {
+          for (let i = 0; i < this.kelpFronds.length; i++) {
+            this.kelpFronds[i].rotation.z = Math.sin(t * 1.6 + i) * 0.18;
+            this.kelpFronds[i].rotation.x = Math.cos(t * 1.3 + i) * 0.14;
+          }
+        }
+      }
+
+      // ========================================================
+      // 6B. Apex Predator (Blacktip Reef Shark)
+      // ========================================================
+      class ApexPredatorShark extends THREE.Group {
+        constructor() {
+          super();
+          this.headPos = new THREE.Vector3(0, 0, 0);
+          this.velocity = new THREE.Vector3(0, 0, 0);
+          this.tailMesh = null;
+          this.buildSharkMesh();
+        }
+
+        buildSharkMesh() {
+          const skinMat = new THREE.MeshStandardMaterial({
+            color: 0x334155,
+            roughness: 0.35,
+            metalness: 0.2
+          });
+          const bellyMat = new THREE.MeshStandardMaterial({
+            color: 0xe2e8f0,
+            roughness: 0.4
+          });
+          const tipMat = new THREE.MeshStandardMaterial({
+            color: 0x090d16,
+            roughness: 0.8
+          });
+
+          // Fusiform torso
+          this.body = new THREE.Group();
+          const torsoGeo = new THREE.ConeGeometry(0.24, 1.4, 12);
+          torsoGeo.rotateX(Math.PI / 2);
+          const torso = new THREE.Mesh(torsoGeo, skinMat);
+          torso.scale.set(0.85, 1.0, 1.0);
+          this.body.add(torso);
+
+          // Snout / Head
+          const headGeo = new THREE.ConeGeometry(0.21, 0.65, 12);
+          headGeo.rotateX(-Math.PI / 2);
+          const head = new THREE.Mesh(headGeo, skinMat);
+          head.position.set(0, -0.02, 0.95);
+          head.scale.set(0.85, 0.85, 1.0);
+          this.body.add(head);
+
+          // Dorsal fin with black tip
+          const dorsalGeo = new THREE.BufferGeometry();
+          const dVerts = new Float32Array([
+            0, 0, 0.2,
+            0, 0.42, -0.15,
+            0, 0, -0.3
+          ]);
+          dorsalGeo.setAttribute('position', new THREE.BufferAttribute(dVerts, 3));
+          dorsalGeo.computeVertexNormals();
+          const dorsalFin = new THREE.Mesh(dorsalGeo, tipMat);
+          dorsalFin.position.set(0, 0.15, 0.1);
+          this.body.add(dorsalFin);
+
+          // Pectoral fins
+          const pectL = new THREE.Mesh(dorsalGeo, skinMat);
+          pectL.rotation.set(0, 0, -Math.PI / 2.6);
+          pectL.scale.set(1, 0.9, 0.9);
+          pectL.position.set(0.2, -0.08, 0.4);
+          this.body.add(pectL);
+
+          const pectR = new THREE.Mesh(dorsalGeo, skinMat);
+          pectR.rotation.set(0, 0, Math.PI / 2.6);
+          pectR.scale.set(1, 0.9, 0.9);
+          pectR.position.set(-0.2, -0.08, 0.4);
+          this.body.add(pectR);
+
+          // Articulated caudal tail
+          this.tailGroup = new THREE.Group();
+          this.tailGroup.position.set(0, 0, -0.7);
+
+          const tailPeduncle = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.18, 0.7, 8), skinMat);
+          tailPeduncle.rotateX(Math.PI / 2);
+          tailPeduncle.position.set(0, 0, -0.35);
+          this.tailGroup.add(tailPeduncle);
+
+          const caudalGeo = new THREE.BufferGeometry();
+          const cVerts = new Float32Array([
+            0, 0, 0,
+            0, 0.45, -0.4,
+            0, -0.28, -0.32
+          ]);
+          caudalGeo.setAttribute('position', new THREE.BufferAttribute(cVerts, 3));
+          caudalGeo.computeVertexNormals();
+          const caudalFin = new THREE.Mesh(caudalGeo, tipMat);
+          caudalFin.position.set(0, 0, -0.7);
+          this.tailGroup.add(caudalFin);
+
+          this.body.add(this.tailGroup);
+          this.add(this.body);
+
+          this.position.set(0, 0.2, -3.5);
+        }
+
+        update(t, dt) {
+          // Patrol spline around room boundaries & reef
+          const orbitR = 3.2;
+          const px = Math.cos(t * 0.35) * orbitR;
+          const pz = Math.sin(t * 0.35) * (orbitR * 0.8) - 1.2;
+          const py = -0.3 + Math.sin(t * 0.5) * 0.45;
+
+          const nextPos = new THREE.Vector3(px, py, pz);
+          this.velocity.copy(nextPos).sub(this.position).divideScalar(dt || 0.016);
+          this.position.copy(nextPos);
+
+          if (this.velocity.lengthSq() > 0.001) {
+            const dir = this.velocity.clone().normalize();
+            this.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+          }
+
+          // Undulate tail fin in sync with swim velocity
+          if (this.tailGroup) {
+            const speed = Math.max(1.0, this.velocity.length());
+            this.tailGroup.rotation.y = Math.sin(t * speed * 4.2) * 0.42;
+          }
+
+          // Compute world head position for Boids evasion
+          this.headPos.copy(this.position).add(new THREE.Vector3(0, 0, 1.2).applyQuaternion(this.quaternion));
+        }
+      }
+
+      // ========================================================
+      // 6C. Volumetric Light Shafts (God Rays)
+      // ========================================================
+      class VolumetricLightShafts extends THREE.Group {
+        constructor() {
+          super();
+          this.rays = [];
+          this.buildLightCones();
+        }
+
+        buildLightCones() {
+          const rayMat = new THREE.MeshBasicMaterial({
+            color: 0x93c5fd,
+            transparent: true,
+            opacity: 0.16,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            side: THREE.DoubleSide
+          });
+
+          const rayGeo = new THREE.CylinderGeometry(0.12, 1.8, 6.0, 16, 1, true);
+          rayGeo.translate(0, -3.0, 0);
+
+          const positions = [
+            [-1.2, 3.8, -2.0, 0.15, 0.1],
+            [ 1.4, 3.9, -1.8, -0.12, 0.08],
+            [ 0.0, 4.0, -3.2, 0.05, -0.15]
+          ];
+
+          for (const [x, y, z, rx, rz] of positions) {
+            const ray = new THREE.Mesh(rayGeo, rayMat);
+            ray.position.set(x, y, z);
+            ray.rotation.x = rx;
+            ray.rotation.z = rz;
+            this.add(ray);
+            this.rays.push({ mesh: ray, baseOpacity: 0.15 });
+          }
+        }
+
+        setBrightness(mult) {
+          for (const r of this.rays) {
+            r.mesh.material.opacity = r.baseOpacity * mult;
+            r.mesh.visible = (mult > 0.02);
+          }
+        }
+
+        update(t) {
+          for (let i = 0; i < this.rays.length; i++) {
+            const r = this.rays[i];
+            r.mesh.rotation.y = t * 0.05 + i;
+          }
+        }
+      }
+
+      // ========================================================
+      // 6D. Hand-held 6DoF Dive Flashlight
+      // ========================================================
+      class DiveFlashlight extends THREE.Group {
+        constructor() {
+          super();
+          this.enabled = true;
+          this.spotLight = new THREE.SpotLight(0xf8fafc, 6.5, 9.0, Math.PI / 7, 0.45, 1.2);
+          this.spotLight.position.set(0, 0, 0);
+          this.add(this.spotLight);
+          this.add(this.spotLight.target);
+          this.spotLight.target.position.set(0, 0, -2.5);
+
+          // Flashlight casing mesh
+          const torchBody = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.024, 0.028, 0.16, 12),
+            new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.8 })
+          );
+          torchBody.rotateX(Math.PI / 2);
+          this.add(torchBody);
+
+          // Lens glow ring
+          const ringMesh = new THREE.Mesh(
+            new THREE.RingGeometry(0.015, 0.028, 12),
+            new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide })
+          );
+          ringMesh.position.set(0, 0, -0.082);
+          this.add(ringMesh);
+        }
+
+        toggle() {
+          this.enabled = !this.enabled;
+          this.spotLight.intensity = this.enabled ? 6.5 : 0.0;
+          return this.enabled;
+        }
+
+        setPose(pos, rot) {
+          this.position.copy(pos);
+          if (rot) this.quaternion.copy(rot);
+        }
+      }
+
+      // ========================================================
+      // 6E. Undulating Water Surface Ceiling (3D Realism)
+      // ========================================================
+      class WaterSurfaceCeiling extends THREE.Group {
+        constructor() {
+          super();
+          const wGeo = new THREE.PlaneGeometry(32, 32, 28, 28);
+          wGeo.rotateX(Math.PI / 2); // Facing downward into the ocean column
+          this.wGeo = wGeo;
+          this.origY = new Float32Array(wGeo.attributes.position.count);
+          const pos = wGeo.attributes.position;
+          for (let i = 0; i < pos.count; i++) {
+            this.origY[i] = pos.getY(i);
+          }
+
+          const wMat = new THREE.MeshStandardMaterial({
+            color: 0x38bdf8,
+            roughness: 0.12,
+            metalness: 0.65,
+            transparent: true,
+            opacity: 0.58,
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending
+          });
+
+          this.mesh = new THREE.Mesh(wGeo, wMat);
+          this.mesh.position.set(0, 2.45, -1.5);
+          this.add(this.mesh);
+        }
+
+        update(t) {
+          const pos = this.wGeo.attributes.position;
+          for (let i = 0; i < pos.count; i++) {
+            const x = pos.getX(i);
+            const z = pos.getZ(i);
+            const wave = Math.sin(x * 0.9 + t * 1.8) * 0.07 + Math.cos(z * 0.7 + t * 1.4) * 0.05;
+            pos.setY(i, this.origY[i] + wave);
+          }
+          pos.needsUpdate = true;
+          this.wGeo.computeVertexNormals();
+        }
+      }
+
+      // ========================================================
+      // 6F. Marine Snow (Micro-Plankton & Organic Detritus)
+      // ========================================================
+      class MarineSnowSystem extends THREE.Group {
+        constructor(count = 1200) {
+          super();
+          this.count = count;
+          const geo = new THREE.BufferGeometry();
+          this.positions = new Float32Array(count * 3);
+          this.velocities = new Float32Array(count * 3);
+
+          for (let i = 0; i < count; i++) {
+            this.positions[i * 3 + 0] = (Math.random() - 0.5) * 16.0;
+            this.positions[i * 3 + 1] = -2.5 + Math.random() * 4.9;
+            this.positions[i * 3 + 2] = -1.5 + (Math.random() - 0.5) * 16.0;
+
+            this.velocities[i * 3 + 0] = (Math.random() - 0.5) * 0.02;
+            this.velocities[i * 3 + 1] = -0.03 - Math.random() * 0.04; // Gentle sedimentation
+            this.velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.02;
+          }
+
+          geo.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
+
+          const mat = new THREE.PointsMaterial({
+            color: 0xe0f2fe,
+            size: 0.035,
+            transparent: true,
+            opacity: 0.65,
+            blending: THREE.AdditiveBlending
+          });
+
+          this.points = new THREE.Points(geo, mat);
+          this.add(this.points);
+        }
+
+        update(t, dt) {
+          const pos = this.points.geometry.attributes.position;
+          for (let i = 0; i < this.count; i++) {
+            const i3 = i * 3;
+            let px = pos.getX(i);
+            let py = pos.getY(i);
+            let pz = pos.getZ(i);
+
+            // Brownian ocean swell
+            px += Math.sin(t * 0.8 + i) * 0.002 + this.velocities[i3 + 0];
+            py += this.velocities[i3 + 1] * dt * 0.7;
+            pz += Math.cos(t * 0.7 + i) * 0.002 + this.velocities[i3 + 2];
+
+            if (py < -2.6) {
+              py = 2.3;
+              px = (Math.random() - 0.5) * 14.0;
+              pz = -1.5 + (Math.random() - 0.5) * 14.0;
+            }
+
+            pos.setXYZ(i, px, py, pz);
+          }
+          pos.needsUpdate = true;
+        }
+      }
+
+      // ========================================================
+      // 6G. Spatial Underwater Research Specimen Viewfinder
+      // ========================================================
+      class SpecimenViewfinder extends THREE.Group {
+        constructor() {
+          super();
+          this.visible = false;
+          this.lockedTarget = null;
+          this.lastLockedName = null;
+
+          // 1. Four Targeting Corner Brackets (LineSegments)
+          const bracketGeo = new THREE.BufferGeometry();
+          const d = 0.16;
+          const arm = 0.045;
+          const verts = [
+            // Top Left
+            -d, d - arm, 0,  -d, d, 0,
+            -d, d, 0,        -d + arm, d, 0,
+            // Top Right
+             d - arm, d, 0,   d, d, 0,
+             d, d, 0,         d, d - arm, 0,
+            // Bottom Right
+             d, -d + arm, 0,  d, -d, 0,
+             d, -d, 0,        d - arm, -d, 0,
+            // Bottom Left
+            -d + arm, -d, 0, -d, -d, 0,
+            -d, -d, 0,       -d, -d + arm, 0,
+          ];
+          bracketGeo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+
+          this.bracketMat = new THREE.LineBasicMaterial({
+            color: 0x38bdf8,
+            linewidth: 2,
+            transparent: true,
+            opacity: 0.95,
+            depthTest: false
+          });
+          this.bracketMesh = new THREE.LineSegments(bracketGeo, this.bracketMat);
+          this.add(this.bracketMesh);
+
+          // Center crosshair pip
+          const pipGeo = new THREE.RingGeometry(0.004, 0.008, 16);
+          const pipMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, depthTest: false });
+          this.pipMesh = new THREE.Mesh(pipGeo, pipMat);
+          this.add(this.pipMesh);
+
+          // 2. Dynamic Specimen Telemetry Label (Canvas Sprite)
+          this.canvas = document.createElement('canvas');
+          this.canvas.width = 512;
+          this.canvas.height = 192;
+          this.ctx = this.canvas.getContext('2d');
+
+          this.texture = new THREE.CanvasTexture(this.canvas);
+          this.texture.minFilter = THREE.LinearFilter;
+          const spriteMat = new THREE.SpriteMaterial({ map: this.texture, transparent: true, depthTest: false });
+          this.sprite = new THREE.Sprite(spriteMat);
+          this.sprite.scale.set(0.38, 0.14, 1);
+          this.sprite.position.set(0, 0.18, 0);
+          this.add(this.sprite);
+
+          this.renderTelemetryCanvas({
+            name: 'SCANNING OCEAN...',
+            family: 'Targeting...',
+            length: '--',
+            health: '--',
+            speed: '--'
+          });
+        }
+
+        renderTelemetryCanvas(data) {
+          const ctx = this.ctx;
+          ctx.clearRect(0, 0, 512, 192);
+
+          // High-tech translucent rounded badge
+          ctx.fillStyle = 'rgba(7, 18, 38, 0.88)';
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.roundRect(8, 8, 496, 176, 16);
+          ctx.fill();
+          ctx.stroke();
+
+          // Header: Specimen Common Name
+          ctx.fillStyle = '#38bdf8';
+          ctx.font = 'bold 30px system-ui, sans-serif';
+          ctx.fillText(data.name || 'UNKNOWN SPECIMEN', 26, 48);
+
+          // Subtitle: Scientific Taxonomy
+          ctx.fillStyle = '#93c5fd';
+          ctx.font = 'italic 20px system-ui, sans-serif';
+          ctx.fillText(data.family || 'Marine Fauna', 26, 80);
+
+          // Divider rule
+          ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(26, 96);
+          ctx.lineTo(486, 96);
+          ctx.stroke();
+
+          // Biometrics Row: Length, Health, Speed
+          ctx.fillStyle = '#f8fafc';
+          ctx.font = 'bold 22px system-ui, monospace';
+          ctx.fillText(`LEN: ${data.length}`, 26, 134);
+          ctx.fillText(`HLTH: ${data.health}`, 190, 134);
+          ctx.fillText(`SPD: ${data.speed}`, 350, 134);
+
+          // Status dot
+          ctx.fillStyle = '#22c55e';
+          ctx.beginPath();
+          ctx.arc(470, 42, 8, 0, Math.PI * 2);
+          ctx.fill();
+
+          this.texture.needsUpdate = true;
+        }
+
+        lockTarget(target) {
+          this.visible = true;
+          this.lockedTarget = target;
+
+          if (target.name !== this.lastLockedName) {
+            this.lastLockedName = target.name;
+            audioEngine.playTargetLockBeep();
+            this.bracketMat.color.setHex(0x22c55e); // Green lock
+          }
+
+          this.renderTelemetryCanvas(target);
+          this.position.copy(target.pos);
+
+          if (target.scale) {
+            const sc = Math.max(0.6, Math.min(2.5, target.scale));
+            this.bracketMesh.scale.setScalar(sc);
+          }
+        }
+
+        clearTarget() {
+          this.visible = false;
+          this.lockedTarget = null;
+          this.lastLockedName = null;
+          this.bracketMat.color.setHex(0x38bdf8);
+        }
+
+        updatePose(camPos, camQuat) {
+          if (!this.visible) return;
+          this.quaternion.copy(camQuat);
+        }
+      }
+
+      // ========================================================
+      // 7. Multi-Species Instanced Oceanic Ecosystem with Boids
+      // ========================================================
+      class OceanicEcosystem extends xb.Script {
+        constructor() {
+          super();
+          this.totalFish = 450;
+          this.maxFish = 800;
+          this.activeFishCount = 450;
+
+          this.mackerelCount = Math.floor(this.maxFish * 0.6);
+          this.tangCount = this.maxFish - this.mackerelCount;
+
+          this.currentBiome = 'sunlit';
+          this.ecologyMode = 'feed';
+
+          this.boidsParams = {
+            cruiseSpeed: 1.8,
+            cohesionWeight: 0.9,
+            separationWeight: 1.6,
+            avoidanceForce: 4.0
+          };
+
+          this.positions = new Float32Array(this.maxFish * 3);
+          this.velocities = new Float32Array(this.maxFish * 3);
+          this.scales = new Float32Array(this.maxFish);
+          this.speeds = new Float32Array(this.maxFish);
+          this.phases = new Float32Array(this.maxFish);
+
+          this.foodPellets = [];
+          this.handPos = new THREE.Vector3(0, -999, 0);
+          this.handActive = false;
+          this.lastHandPos = new THREE.Vector3(0, -999, 0);
+          this.handVelocity = new THREE.Vector3(0, 0, 0);
+
+          this.anchorsPinned = false;
+          this.anchorRecords = [];
+
+          this.spatialPhysicsCard = null;
+          this.spatialNaturalistCard = null;
+          this.spatialJournalCard = null;
+
+          this.viewfinder = null;
+          this.journalEntries = [];
+          this.cameraModeActive = true;
+
+          this.biomeScale = 1.0;
+          this.lastTwoHandDist = 0;
+
+          this.shark = null;
+          this.godRays = null;
+          this.flashlight = null;
+          this.waterSurface = null;
+          this.marineSnow = null;
+
+          this.dummy = new THREE.Object3D();
+          this.meshMackerel = null;
+          this.meshTang = null;
+          this.matMackerel = null;
+          this.matTang = null;
+        }
+
+        init() {
+          this.setupLighting();
+          this.setupEnvironment();
+          this.setupTabletopReefs();
+          this.setupDepthOcclusionGeometry();
+          this.setupMultiSpeciesFish();
+          this.setupSpatialPhysicsCard();
+          this.setupSpatialNaturalistCard();
+          this.setupSpatialJournalCard();
+          this.setupFoodSystem();
+
+          this.shark = new ApexPredatorShark();
+          this.add(this.shark);
+
+          this.godRays = new VolumetricLightShafts();
+          this.add(this.godRays);
+
+          this.flashlight = new DiveFlashlight();
+          this.add(this.flashlight);
+
+          this.viewfinder = new SpecimenViewfinder();
+          this.add(this.viewfinder);
+
+          this.onPointerDown = this.onPointerDown.bind(this);
+          window.addEventListener('pointerdown', this.onPointerDown);
+
+          this.restorePersistentAnchors();
+        }
+
+        dispose() {
+          window.removeEventListener('pointerdown', this.onPointerDown);
+          if (this.meshMackerel) {
+            this.remove(this.meshMackerel);
+            this.meshMackerel.geometry.dispose();
+            this.meshMackerel.material.dispose();
+          }
+          if (this.meshTang) {
+            this.remove(this.meshTang);
+            this.meshTang.geometry.dispose();
+            this.meshTang.material.dispose();
+          }
+          if (this.shark) this.remove(this.shark);
+          if (this.godRays) this.remove(this.godRays);
+          if (this.flashlight) this.remove(this.flashlight);
+          if (this.viewfinder) this.remove(this.viewfinder);
+          if (this.waterSurface) this.remove(this.waterSurface);
+          if (this.marineSnow) this.remove(this.marineSnow);
+          if (this.spatialPhysicsCard) this.remove(this.spatialPhysicsCard);
+          if (this.spatialNaturalistCard) this.remove(this.spatialNaturalistCard);
+          if (this.spatialJournalCard) this.remove(this.spatialJournalCard);
+        }
+
+        setupLighting() {
+          this.ambientLight = new THREE.AmbientLight(0x0a3c5a, 2.0);
+          this.add(this.ambientLight);
+
+          this.sunLight = new THREE.DirectionalLight(0xbde8ff, 3.5);
+          this.sunLight.position.set(2, 10, 3);
+          this.add(this.sunLight);
+        }
+
+        setupEnvironment() {
+          const floorGeo = new THREE.PlaneGeometry(35, 35, 36, 36);
+          floorGeo.rotateX(-Math.PI / 2);
+          const pos = floorGeo.attributes.position;
+          for (let i = 0; i < pos.count; i++) {
+            const x = pos.getX(i);
+            const z = pos.getZ(i);
+            pos.setY(i, Math.sin(x * 0.4) * 0.4 + Math.cos(z * 0.4) * 0.4 - 2.8);
+          }
+          floorGeo.computeVertexNormals();
+
+          this.seabedMat = new THREE.MeshStandardMaterial({
+            color: 0x1b3b55,
+            roughness: 0.85,
+            metalness: 0.1
+          });
+          this.seabed = new THREE.Mesh(floorGeo, this.seabedMat);
+          this.add(this.seabed);
+
+          const bCount = 600;
+          const bGeo = new THREE.BufferGeometry();
+          const bPos = new Float32Array(bCount * 3);
+          for (let i = 0; i < bCount; i++) {
+            bPos[i * 3 + 0] = (Math.random() - 0.5) * 20;
+            bPos[i * 3 + 1] = -2.5 + Math.random() * 5.0;
+            bPos[i * 3 + 2] = (Math.random() - 0.5) * 20;
+          }
+          bGeo.setAttribute('position', new THREE.BufferAttribute(bPos, 3));
+          const bMat = new THREE.PointsMaterial({
+            color: 0xa5f3fc,
+            size: 0.08,
+            transparent: true,
+            opacity: 0.7,
+            blending: THREE.AdditiveBlending
+          });
+          this.bubbleSystem = new THREE.Points(bGeo, bMat);
+          this.add(this.bubbleSystem);
+
+          this.waterSurface = new WaterSurfaceCeiling();
+          this.add(this.waterSurface);
+
+          this.marineSnow = new MarineSnowSystem(1200);
+          this.add(this.marineSnow);
+        }
+
+        // ========================================================
+        // Depth Occlusion Barrier Mesh (xb-add-world-sensing)
+        // ========================================================
+        setupDepthOcclusionGeometry() {
+          // Creates a depth-writing occlusion barrier so fish swimming behind
+          // physical room obstacles are occluded naturally
+          const occMat = new THREE.MeshBasicMaterial({
+            colorWrite: false, // Transparent to color, writes only to depth buffer
+            depthWrite: true
+          });
+
+          // Simulated tabletop occlusion surfaces matching room desks
+          const deskOccA = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.1, 0.9), occMat);
+          deskOccA.position.set(-1.7, -0.6, -1.8);
+          this.add(deskOccA);
+
+          const deskOccB = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.1, 0.9), occMat);
+          deskOccB.position.set(1.7, -0.6, -1.8);
+          this.add(deskOccB);
+        }
+
+        setupTabletopReefs() {
+          this.tabletopReefs = new TabletopReefSystem();
+          this.add(this.tabletopReefs);
+        }
+
+        setupMultiSpeciesFish() {
+          const mackerelGeo = createMackerelGeometry();
+          this.matMackerel = createPbrIridescentFishMaterial(0.0);
+          this.meshMackerel = new THREE.InstancedMesh(mackerelGeo, this.matMackerel, this.mackerelCount);
+          this.meshMackerel.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+
+          const tangGeo = createCoralTangGeometry();
+          this.matTang = createPbrIridescentFishMaterial(1.0);
+          this.meshTang = new THREE.InstancedMesh(tangGeo, this.matTang, this.tangCount);
+          this.meshTang.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+
+          const speedsM = new Float32Array(this.mackerelCount);
+          const phasesM = new Float32Array(this.mackerelCount);
+          const speedsT = new Float32Array(this.tangCount);
+          const phasesT = new Float32Array(this.tangCount);
+
+          const mackerelColors = [new THREE.Color(0x00f0ff), new THREE.Color(0x0284c7), new THREE.Color(0x38bdf8)];
+          const tangColors = [new THREE.Color(0xffaa00), new THREE.Color(0xfbbf24), new THREE.Color(0xf43f5e)];
+
+          for (let i = 0; i < this.maxFish; i++) {
+            const isMackerel = i < this.mackerelCount;
+            const subIdx = isMackerel ? i : i - this.mackerelCount;
+
+            const px = (Math.random() - 0.5) * 6.0;
+            const py = -0.5 + (Math.random() - 0.5) * 1.8;
+            const pz = -1.8 + (Math.random() - 0.5) * 5.0;
+
+            this.positions[i * 3 + 0] = px;
+            this.positions[i * 3 + 1] = py;
+            this.positions[i * 3 + 2] = pz;
+
+            this.velocities[i * 3 + 0] = (Math.random() - 0.5) * 0.8;
+            this.velocities[i * 3 + 1] = (Math.random() - 0.5) * 0.2;
+            this.velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.8;
+
+            const spd = isMackerel ? (1.0 + Math.random() * 0.5) : (0.75 + Math.random() * 0.4);
+            const ph = Math.random() * Math.PI * 2;
+            const sc = isMackerel ? (0.8 + Math.random() * 0.4) : (0.75 + Math.random() * 0.35);
+
+            this.speeds[i] = spd;
+            this.phases[i] = ph;
+            this.scales[i] = sc;
+
+            this.dummy.position.set(px, py, pz);
+            this.dummy.scale.setScalar(sc);
+            this.dummy.updateMatrix();
+
+            if (isMackerel) {
+              speedsM[subIdx] = spd;
+              phasesM[subIdx] = ph;
+              const c = mackerelColors[subIdx % mackerelColors.length].clone();
+              this.meshMackerel.setColorAt(subIdx, c);
+              this.meshMackerel.setMatrixAt(subIdx, this.dummy.matrix);
+            } else {
+              speedsT[subIdx] = spd;
+              phasesT[subIdx] = ph;
+              const c = tangColors[subIdx % tangColors.length].clone();
+              this.meshTang.setColorAt(subIdx, c);
+              this.meshTang.setMatrixAt(subIdx, this.dummy.matrix);
+            }
+          }
+
+          mackerelGeo.setAttribute('aInstanceSpeed', new THREE.InstancedBufferAttribute(speedsM, 1));
+          mackerelGeo.setAttribute('aInstancePhase', new THREE.InstancedBufferAttribute(phasesM, 1));
+          tangGeo.setAttribute('aInstanceSpeed', new THREE.InstancedBufferAttribute(speedsT, 1));
+          tangGeo.setAttribute('aInstancePhase', new THREE.InstancedBufferAttribute(phasesT, 1));
+
+          this.meshMackerel.instanceMatrix.needsUpdate = true;
+          this.meshTang.instanceMatrix.needsUpdate = true;
+          if (this.meshMackerel.instanceColor) this.meshMackerel.instanceColor.needsUpdate = true;
+          if (this.meshTang.instanceColor) this.meshTang.instanceColor.needsUpdate = true;
+
+          this.add(this.meshMackerel);
+          this.add(this.meshTang);
+        }
+
+        // ========================================================
+        // Spatial UI Card 1: Boids Physics Console (xb-add-spatial-ui)
+        // ========================================================
+        setupSpatialPhysicsCard() {
+          const statusText = new xb.UIText({
+            text: 'Movable 6DoF Physics Console · Drag edges in 3D.',
+            style: { fontSize: 13, opacity: 0.8, textAlign: 'center' },
+          });
+
+          const speedVal = new xb.UIText({ text: '1.8 m/s', style: { fontSize: 14, fontWeight: 'bold' } });
+          const speedSlider = new xb.UISlider({
+            ariaLabel: 'Cruise Speed',
+            min: 0.5,
+            max: 4.0,
+            step: 0.1,
+            value: 1.8,
+            style: { width: '100%', height: 30 },
+            onInput: (val) => {
+              this.boidsParams.cruiseSpeed = val;
+              speedVal.text = `${val.toFixed(1)} m/s`;
+            },
+          });
+
+          const cohesionVal = new xb.UIText({ text: '0.9', style: { fontSize: 14, fontWeight: 'bold' } });
+          const cohesionSlider = new xb.UISlider({
+            ariaLabel: 'School Cohesion',
+            min: 0.1,
+            max: 2.5,
+            step: 0.1,
+            value: 0.9,
+            style: { width: '100%', height: 30 },
+            onInput: (val) => {
+              this.boidsParams.cohesionWeight = val;
+              cohesionVal.text = `${val.toFixed(1)}`;
+            },
+          });
+
+          const sepVal = new xb.UIText({ text: '1.6', style: { fontSize: 14, fontWeight: 'bold' } });
+          const sepSlider = new xb.UISlider({
+            ariaLabel: 'Neighbor Separation',
+            min: 0.3,
+            max: 3.0,
+            step: 0.1,
+            value: 1.6,
+            style: { width: '100%', height: 30 },
+            onInput: (val) => {
+              this.boidsParams.separationWeight = val;
+              sepVal.text = `${val.toFixed(1)}`;
+            },
+          });
+
+          const avoidVal = new xb.UIText({ text: '4.0', style: { fontSize: 14, fontWeight: 'bold' } });
+          const avoidSlider = new xb.UISlider({
+            ariaLabel: 'Hand Obstacle Avoidance',
+            min: 1.0,
+            max: 8.0,
+            step: 0.5,
+            value: 4.0,
+            style: { width: '100%', height: 30 },
+            onInput: (val) => {
+              this.boidsParams.avoidanceForce = val;
+              avoidVal.text = `${val.toFixed(1)}`;
+            },
+          });
+
+          const createSliderRow = (label, valComp, sliderComp) => {
+            return new xb.UIPanel({
+              style: { width: '100%', flexDirection: 'column', gap: 3 },
+              children: [
+                new xb.UIPanel({
+                  style: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+                  children: [
+                    new xb.UIText({ text: label, style: { fontSize: 13, color: '#93c5fd' } }),
+                    valComp,
+                  ],
+                }),
+                sliderComp,
+              ],
+            });
+          };
+
+          const btnRow = new xb.UIPanel({
+            style: { width: '100%', flexDirection: 'row', gap: 6 },
+            children: [
+              new xb.UIButton({
+                label: 'Feed',
+                icon: 'water_drop',
+                style: { flexGrow: 1 },
+                onClick: () => {
+                  window.setEcologyMode('feed');
+                  statusText.text = 'Mode: Pinch or click to drop food pellets.';
+                },
+              }),
+              new xb.UIButton({
+                label: 'Attract',
+                icon: 'flare',
+                style: { flexGrow: 1 },
+                onClick: () => {
+                  window.setEcologyMode('attract');
+                  statusText.text = 'Mode: Point index finger to guide school.';
+                },
+              }),
+              new xb.UIButton({
+                label: 'Scatter',
+                icon: 'speed',
+                style: { flexGrow: 1 },
+                onClick: () => {
+                  window.setEcologyMode('scatter');
+                  statusText.text = 'Mode: Fast palm sweep to scatter fish.';
+                },
+              }),
+            ],
+          });
+
+          const biomeRow = new xb.UIPanel({
+            style: { width: '100%', flexDirection: 'row', gap: 6 },
+            children: [
+              new xb.UIButton({
+                label: 'Sunlit',
+                style: { flexGrow: 1 },
+                onClick: () => window.setBiome('sunlit'),
+              }),
+              new xb.UIButton({
+                label: 'Lagoon',
+                style: { flexGrow: 1 },
+                onClick: () => window.setBiome('reef'),
+              }),
+              new xb.UIButton({
+                label: 'Abyss',
+                style: { flexGrow: 1 },
+                onClick: () => window.setBiome('abyss'),
+              }),
+              new xb.UIButton({
+                label: 'Night',
+                style: { flexGrow: 1 },
+                onClick: () => window.setBiome('night'),
+              }),
+            ],
+          });
+
+          const scaleRow = new xb.UIPanel({
+            style: { width: '100%', flexDirection: 'row', gap: 6 },
+            children: [
+              new xb.UIButton({
+                label: 'Diorama (0.5x)',
+                icon: 'view_in_ar',
+                style: { flexGrow: 1 },
+                onClick: () => this.setBiomeScale(0.5),
+              }),
+              new xb.UIButton({
+                label: 'Room (1.0x)',
+                icon: 'crop_free',
+                style: { flexGrow: 1 },
+                onClick: () => this.setBiomeScale(1.0),
+              }),
+              new xb.UIButton({
+                label: 'Abyss (1.8x)',
+                icon: 'fullscreen',
+                style: { flexGrow: 1 },
+                onClick: () => this.setBiomeScale(1.8),
+              }),
+            ],
+          });
+
+          this.spatialPhysicsCard = new xb.UICard({
+            size: { width: 0.58, height: 'auto' },
+            manipulation: true,
+            edge: true,
+            style: {
+              flexDirection: 'column',
+              gap: 10,
+              padding: 16,
+              backgroundColor: '#061324f0',
+              borderRadius: 16,
+            },
+            children: [
+              new xb.UIText({
+                text: 'Boids Physics Console',
+                style: { fontSize: 20, fontWeight: 'bold', textAlign: 'center', color: '#f8fafc' },
+              }),
+              new xb.UIText({
+                text: 'Depth Occlusion & Spatial Anchors Active',
+                style: { fontSize: 12, textAlign: 'center', color: '#38bdf8' },
+              }),
+              createSliderRow('Cruise Speed', speedVal, speedSlider),
+              createSliderRow('School Cohesion', cohesionVal, cohesionSlider),
+              createSliderRow('Neighbor Separation', sepVal, sepSlider),
+              createSliderRow('Hand Evasion Force', avoidVal, avoidSlider),
+              btnRow,
+              biomeRow,
+              scaleRow,
+              statusText,
+            ],
+          });
+
+          this.spatialPhysicsCard.position.set(-0.48, 1.40, -1.05);
+          this.spatialPhysicsCard.rotation.y = 0.18;
+          this.add(this.spatialPhysicsCard);
+        }
+
+        setBiomeScale(sc) {
+          const clamped = Math.max(0.35, Math.min(2.5, sc));
+          this.biomeScale = clamped;
+          this.scale.setScalar(clamped);
+
+          const tip = document.getElementById('hud-xr-tip');
+          if (tip) {
+            const label = clamped < 0.7 ? 'Tabletop Diorama' : (clamped > 1.4 ? 'Abyssal Room Scale' : 'Standard Room Scale');
+            tip.textContent = `Biome Scale: ${clamped.toFixed(2)}x (${label})`;
+          }
+          const scaleDisplay = document.getElementById('biome-scale-display');
+          if (scaleDisplay) scaleDisplay.textContent = `${clamped.toFixed(1)}x`;
+          const slider = document.getElementById('slider-biome-scale');
+          if (slider) slider.value = clamped;
+          audioEngine.playBubblePop(1.1);
+        }
+
+        // =================================================================
+        // Spatial UI Card 2: Gemini Marine Naturalist AI (xb-add-ai)
+        // =================================================================
+        setupSpatialNaturalistCard() {
+          this.aiResponseText = new xb.UIText({
+            text: 'Welcome to the Oceanic Sanctuary! I am Dr. Marina Thorne, your Marine Naturalist. Ask me about schooling hydrodynamics, scale iridescence, or tabletop coral reefs.',
+            style: { fontSize: 13, lineHeight: 18, color: '#f1f5f9', textAlign: 'left' },
+          });
+
+          this.aiTelemetryText = new xb.UIText({
+            text: 'Telemetry: 450 Fish (60% Mackerel, 40% Tang) · Speed: 1.8 m/s · Habitat: Sunlit Shallows',
+            style: { fontSize: 11, color: '#38bdf8', opacity: 0.9 },
+          });
+
+          const askQuick = async (query) => {
+            this.aiResponseText.text = 'Consulting Gemini Marine Intelligence...';
+            const telemetry = {
+              population: this.activeFishCount,
+              mackerelPercentage: '60%',
+              tangPercentage: '40%',
+              biome: this.currentBiome,
+              cruiseSpeed: `${this.boidsParams.cruiseSpeed.toFixed(1)} m/s`,
+              tableReefsActive: true,
+              depthOcclusion: true,
+              anchorsPinned: this.anchorsPinned,
+              handActive: this.handActive
+            };
+            const answer = await naturalistAgent.queryNaturalist(query, telemetry);
+            this.aiResponseText.text = answer;
+          };
+
+          this.triggerAIQuestion = askQuick;
+
+          const topicRow1 = new xb.UIPanel({
+            style: { width: '100%', flexDirection: 'row', gap: 6 },
+            children: [
+              new xb.UIButton({
+                label: 'Why School?',
+                icon: 'group',
+                style: { flexGrow: 1 },
+                onClick: () => askQuick('Why do fish school in tight spherical bait balls?'),
+              }),
+              new xb.UIButton({
+                label: 'Iridescent Scales',
+                icon: 'flare',
+                style: { flexGrow: 1 },
+                onClick: () => askQuick('How do fish scales produce thin-film iridescence?'),
+              }),
+            ],
+          });
+
+          const topicRow2 = new xb.UIPanel({
+            style: { width: '100%', flexDirection: 'row', gap: 6 },
+            children: [
+              new xb.UIButton({
+                label: 'Reef Ecology',
+                icon: 'water_drop',
+                style: { flexGrow: 1 },
+                onClick: () => askQuick('What role do Coral Tangs play in tabletop coral reef health?'),
+              }),
+              new xb.UIButton({
+                label: 'Shark Evasion',
+                icon: 'warning',
+                style: { flexGrow: 1 },
+                onClick: () => askQuick('Why do schooling fish execute flash expansion and vacuole maneuvers around reef sharks?'),
+              }),
+            ],
+          });
+
+          const actionRow = new xb.UIPanel({
+            style: { width: '100%', flexDirection: 'row', gap: 6 },
+            children: [
+              new xb.UIButton({
+                label: 'Voice Mic',
+                icon: 'mic',
+                style: { flexGrow: 1 },
+                onClick: () => naturalistMic.toggle(),
+              }),
+              new xb.UIButton({
+                label: 'Listen Voice',
+                icon: 'volume_up',
+                style: { flexGrow: 1 },
+                onClick: () => {
+                  if (this.aiResponseText.text) {
+                    naturalistVoice.speak(this.aiResponseText.text);
+                  }
+                },
+              }),
+              new xb.UIButton({
+                label: 'Pin Anchor',
+                icon: 'push_pin',
+                style: { flexGrow: 0.8 },
+                onClick: () => window.toggleSpatialAnchors(),
+              }),
+            ],
+          });
+
+          this.spatialNaturalistCard = new xb.UICard({
+            size: { width: 0.58, height: 'auto' },
+            manipulation: true,
+            edge: true,
+            style: {
+              flexDirection: 'column',
+              gap: 10,
+              padding: 16,
+              backgroundColor: '#051120f0',
+              borderRadius: 16,
+            },
+            children: [
+              new xb.UIText({
+                text: 'Marine Naturalist AI',
+                style: { fontSize: 20, fontWeight: 'bold', textAlign: 'center', color: '#f8fafc' },
+              }),
+              new xb.UIText({
+                text: 'Voice Narration & Spatial Grounding · Dr. Marina Thorne',
+                style: { fontSize: 12, textAlign: 'center', color: '#38bdf8' },
+              }),
+              this.aiTelemetryText,
+              new xb.UIPanel({
+                style: {
+                  width: '100%',
+                  padding: 12,
+                  backgroundColor: '#091c33cc',
+                  borderRadius: 10,
+                },
+                children: [this.aiResponseText],
+              }),
+              actionRow,
+              topicRow1,
+              topicRow2,
+            ],
+          });
+
+          this.spatialNaturalistCard.position.set(0.48, 1.40, -1.05);
+          this.spatialNaturalistCard.rotation.y = -0.18;
+          this.add(this.spatialNaturalistCard);
+        }
+
+        setupSpatialJournalCard() {
+          this.journalHeader = new xb.UIText({
+            text: 'Biologist Field Journal',
+            style: { fontSize: 18, fontWeight: 'bold', textAlign: 'center', color: '#f8fafc' },
+          });
+
+          this.journalSubHeader = new xb.UIText({
+            text: 'Discovered: 0 / 4 Species · Camera: Ready',
+            style: { fontSize: 11, textAlign: 'center', color: '#38bdf8' },
+          });
+
+          this.journalListText = new xb.UIText({
+            text: '• Point research camera at swimming fish, corals, or shark\n• Press [📸 Shutter] to log biological observations',
+            style: { fontSize: 12, lineHeight: 18, color: '#94a3b8', textAlign: 'left' },
+          });
+
+          const journalActionRow = new xb.UIPanel({
+            style: { width: '100%', flexDirection: 'row', gap: 6 },
+            children: [
+              new xb.UIButton({
+                label: 'Take Photo',
+                icon: 'photo_camera',
+                style: { flexGrow: 1.2 },
+                onClick: () => this.captureSpecimenSnapshot(),
+              }),
+              new xb.UIButton({
+                label: 'Clear Log',
+                icon: 'delete',
+                style: { flexGrow: 0.8 },
+                onClick: () => {
+                  this.journalEntries = [];
+                  this.journalSubHeader.text = 'Discovered: 0 / 4 Species · Camera: Ready';
+                  this.journalListText.text = '• Point research camera at swimming fish, corals, or shark\n• Press [📸 Shutter] to log biological observations';
+                  audioEngine.playBubblePop(1.5);
+                },
+              }),
+            ],
+          });
+
+          this.spatialJournalCard = new xb.UICard({
+            size: { width: 0.52, height: 'auto' },
+            manipulation: true,
+            edge: true,
+            style: {
+              flexDirection: 'column',
+              gap: 8,
+              padding: 14,
+              backgroundColor: '#051120f0',
+              borderRadius: 16,
+            },
+            children: [
+              this.journalHeader,
+              this.journalSubHeader,
+              new xb.UIPanel({
+                style: {
+                  width: '100%',
+                  padding: 10,
+                  backgroundColor: '#091c33cc',
+                  borderRadius: 10,
+                },
+                children: [this.journalListText],
+              }),
+              journalActionRow,
+            ],
+          });
+
+          this.spatialJournalCard.position.set(1.12, 1.35, -1.0);
+          this.spatialJournalCard.rotation.y = -0.32;
+          this.add(this.spatialJournalCard);
+        }
+
+        captureSpecimenSnapshot() {
+          audioEngine.playCameraShutter();
+
+          const flash = document.getElementById('camera-flash-overlay');
+          if (flash) {
+            flash.style.opacity = '0.85';
+            setTimeout(() => { flash.style.opacity = '0'; }, 120);
+          }
+
+          const target = this.viewfinder ? this.viewfinder.lockedTarget : null;
+          let entry;
+
+          if (target && target.name) {
+            entry = {
+              name: target.name,
+              family: target.family,
+              length: target.length,
+              health: target.health,
+              speed: target.speed,
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+            };
+
+            const existingIdx = this.journalEntries.findIndex(e => e.name === target.name);
+            if (existingIdx >= 0) {
+              this.journalEntries[existingIdx] = entry;
+            } else {
+              this.journalEntries.push(entry);
+            }
+
+            if (target.name.includes('SHARK')) {
+              naturalistVoice.speak("Dr. Marina Thorne: Outstanding capture! Blacktip Reef Shark logged into the field journal. Notice its rapid caudal thrust and hydrodynamic dorsal fin tips.");
+            } else if (target.name.includes('MACKEREL')) {
+              naturalistVoice.speak("Dr. Marina Thorne: Excellent focus! Atlantic Mackerel cataloged. Its fusiform body geometry and ctenoid scale iridescence are clearly visible.");
+            } else if (target.name.includes('TANG')) {
+              naturalistVoice.speak("Dr. Marina Thorne: Great shot! Yellowtail Coral Tang recorded. A critical herbivore maintaining the balance of our tabletop coral reefs.");
+            } else if (target.name.includes('CORAL')) {
+              naturalistVoice.speak("Dr. Marina Thorne: Specimen confirmed: Acropora coral reef colony showing high polyp vitality and organic growth architecture.");
+            }
+          } else {
+            entry = {
+              name: 'Ocean Water Column Survey',
+              family: 'Marine Plankton & Caustics',
+              length: 'N/A',
+              health: '100%',
+              speed: '0.2 m/s',
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+            };
+            if (!this.journalEntries.some(e => e.name === entry.name)) {
+              this.journalEntries.push(entry);
+            }
+            naturalistVoice.speak("Dr. Marina Thorne: Ambient pelagic survey captured. Suspended marine snow detritus and surface wave refractions logged.");
+          }
+
+          if (this.journalSubHeader && this.journalListText) {
+            const count = this.journalEntries.length;
+            this.journalSubHeader.text = `Discovered: ${count} / 4 Species · Camera: Logged`;
+            
+            let logText = '';
+            for (let i = 0; i < this.journalEntries.length; i++) {
+              const e = this.journalEntries[i];
+              logText += `📸 [${e.time}] ${e.name}\n   Len: ${e.length} | Health: ${e.health} | Spd: ${e.speed}\n`;
+            }
+            this.journalListText.text = logText.trim();
+          }
+
+          const tip = document.getElementById('hud-xr-tip');
+          if (tip && entry) {
+            tip.textContent = `Captured: ${entry.name}!`;
+          }
+        }
+
+        // ========================================================
+        // Spatial Anchors Engine (xb-anchors Skill)
+        // ========================================================
+        async toggleSpatialAnchors() {
+          this.anchorsPinned = !this.anchorsPinned;
+          audioEngine.playAnchorLock();
+
+          const tip = document.getElementById('hud-xr-tip');
+          const btn = document.getElementById('btn-anchor-toggle');
+
+          if (this.anchorsPinned) {
+            if (btn) btn.classList.add('active');
+            if (tip) tip.textContent = 'Spatial Anchors: PINNED to Real Room';
+
+            // Attempt WebXR native anchor creation
+            if (xb.core.world && xb.core.world.anchors && xb.core.world.anchors.create) {
+              try {
+                if (this.spatialNaturalistCard) {
+                  const p = this.spatialNaturalistCard.position;
+                  const pose = new XRRigidTransform({ x: p.x, y: p.y, z: p.z }, { x: 0, y: 0, z: 0, w: 1 });
+                  const tracked = await xb.core.world.anchors.create(pose, 'naturalist_card');
+                  if (tracked) {
+                    await xb.core.world.anchors.persist(tracked.id);
+                    this.anchorRecords.push(tracked);
+                  }
+                }
+              } catch (e) {
+                console.warn('Native WebXR anchor note:', e);
+              }
+            }
+          } else {
+            if (btn) btn.classList.remove('active');
+            if (tip) tip.textContent = 'Spatial Anchors: UNPINNED (Movable 6DoF)';
+          }
+
+          this.updateTelemetryCard();
+          return this.anchorsPinned;
+        }
+
+        async restorePersistentAnchors() {
+          if (xb.core.world && xb.core.world.anchors && xb.core.world.anchors.restoreAll) {
+            try {
+              const results = await xb.core.world.anchors.restoreAll();
+              if (results && results.length > 0) {
+                console.log('Restored WebXR spatial anchors:', results);
+                this.anchorsPinned = true;
+                const btn = document.getElementById('btn-anchor-toggle');
+                if (btn) btn.classList.add('active');
+              }
+            } catch (e) {
+              console.warn('Anchor restore note:', e);
+            }
+          }
+        }
+
+        setupFoodSystem() {
+          this.foodGeo = new THREE.SphereGeometry(0.035, 12, 12);
+          this.foodMat = new THREE.MeshStandardMaterial({
+            color: 0xffd166,
+            emissive: 0xff9f1c,
+            emissiveIntensity: 0.8,
+            roughness: 0.2
+          });
+        }
+
+        spawnFoodPellet(pos, vel = null) {
+          const mesh = new THREE.Mesh(this.foodGeo, this.foodMat);
+          mesh.position.copy(pos);
+          const velocity = vel ? vel.clone() : new THREE.Vector3(
+            (Math.random() - 0.5) * 0.2,
+            -0.45 - Math.random() * 0.2,
+            (Math.random() - 0.5) * 0.2
+          );
+          this.add(mesh);
+          this.foodPellets.push({
+            mesh,
+            pos: mesh.position,
+            vel: velocity,
+            life: 14.0
+          });
+          audioEngine.playFeedPellet();
+        }
+
+        onPointerDown(e) {
+          if (e.target.closest && (e.target.closest('.hud-dock') || e.target.closest('.hud-header'))) {
+            return;
+          }
+          if (this.ecologyMode === 'feed') {
+            const cam = xb.core.camera;
+            if (cam) {
+              const forward = new THREE.Vector3(0, -0.1, -1.2).applyQuaternion(cam.quaternion);
+              const dropPos = cam.position.clone().add(forward);
+              this.spawnFoodPellet(dropPos);
+            }
+          } else if (this.ecologyMode === 'scatter') {
+            audioEngine.playScatterWhoosh();
+            if (xb.core.camera) {
+              this.handPos.copy(xb.core.camera.position);
+              this.handVelocity.set(0, 0, -5.0);
+            }
+          } else if (this.ecologyMode === 'attract') {
+            audioEngine.playAttractTone();
+          }
+        }
+
+        setBiome(biome) {
+          this.currentBiome = biome;
+          if (biome === 'sunlit') {
+            this.ambientLight.color.setHex(0x0a3c5a);
+            this.ambientLight.intensity = 2.5;
+            this.sunLight.color.setHex(0xbde8ff);
+            this.sunLight.intensity = 4.0;
+            this.seabedMat.color.setHex(0x1b3b55);
+            [this.matMackerel, this.matTang].forEach(m => {
+              if (m && m.userData.shader) {
+                m.userData.shader.uniforms.uCausticsStrength.value = 0.5;
+                m.userData.shader.uniforms.uBiolumGlow.value = 0.0;
+              }
+            });
+            if (this.godRays) this.godRays.setBrightness(1.0);
+          } else if (biome === 'reef') {
+            this.ambientLight.color.setHex(0x164e63);
+            this.ambientLight.intensity = 2.8;
+            this.sunLight.color.setHex(0x7dd3fc);
+            this.sunLight.intensity = 3.5;
+            this.seabedMat.color.setHex(0x0e7490);
+            [this.matMackerel, this.matTang].forEach(m => {
+              if (m && m.userData.shader) {
+                m.userData.shader.uniforms.uCausticsStrength.value = 0.7;
+                m.userData.shader.uniforms.uBiolumGlow.value = 0.2;
+              }
+            });
+            if (this.godRays) this.godRays.setBrightness(0.75);
+          } else if (biome === 'abyss') {
+            this.ambientLight.color.setHex(0x020617);
+            this.ambientLight.intensity = 0.7;
+            this.sunLight.color.setHex(0x38bdf8);
+            this.sunLight.intensity = 1.0;
+            this.seabedMat.color.setHex(0x020617);
+            [this.matMackerel, this.matTang].forEach(m => {
+              if (m && m.userData.shader) {
+                m.userData.shader.uniforms.uCausticsStrength.value = 0.15;
+                m.userData.shader.uniforms.uBiolumGlow.value = 0.95;
+              }
+            });
+            if (this.godRays) this.godRays.setBrightness(0.2);
+          } else if (biome === 'night') {
+            this.ambientLight.color.setHex(0x01040f);
+            this.ambientLight.intensity = 0.4;
+            this.sunLight.color.setHex(0x38bdf8);
+            this.sunLight.intensity = 0.5;
+            this.seabedMat.color.setHex(0x010614);
+            [this.matMackerel, this.matTang].forEach(m => {
+              if (m && m.userData.shader) {
+                m.userData.shader.uniforms.uCausticsStrength.value = 0.05;
+                m.userData.shader.uniforms.uBiolumGlow.value = 1.4;
+              }
+            });
+            if (this.godRays) this.godRays.setBrightness(0.08);
+          }
+          audioEngine.playBubblePop(1.2);
+          this.updateTelemetryCard();
+        }
+
+        setFishCount(count) {
+          this.activeFishCount = Math.min(this.maxFish, Math.max(50, count));
+          const mActive = Math.floor(this.activeFishCount * 0.6);
+          const tActive = this.activeFishCount - mActive;
+
+          for (let i = mActive; i < this.mackerelCount; i++) {
+            this.dummy.position.set(0, -999, 0);
+            this.dummy.scale.setScalar(0);
+            this.dummy.updateMatrix();
+            this.meshMackerel.setMatrixAt(i, this.dummy.matrix);
+          }
+          for (let i = tActive; i < this.tangCount; i++) {
+            this.dummy.position.set(0, -999, 0);
+            this.dummy.scale.setScalar(0);
+            this.dummy.updateMatrix();
+            this.meshTang.setMatrixAt(i, this.dummy.matrix);
+          }
+          this.meshMackerel.instanceMatrix.needsUpdate = true;
+          this.meshTang.instanceMatrix.needsUpdate = true;
+          this.updateTelemetryCard();
+        }
+
+        updateTelemetryCard() {
+          if (this.aiTelemetryText) {
+            this.aiTelemetryText.text = `Telemetry: ${this.activeFishCount} Fish · Speed: ${this.boidsParams.cruiseSpeed.toFixed(1)} m/s · Habitat: ${this.currentBiome} · Anchors: ${this.anchorsPinned ? 'Pinned' : 'Floating'}`;
+          }
+        }
+
+        update() {
+          const t = performance.now() * 0.001;
+          const dt = 0.016;
+
+          [this.matMackerel, this.matTang].forEach(m => {
+            if (m && m.userData.shader) {
+              m.userData.shader.uniforms.uTime.value = t;
+            }
+          });
+
+          if (this.tabletopReefs) {
+            this.tabletopReefs.update(t);
+          }
+
+          if (this.waterSurface) {
+            this.waterSurface.update(t);
+          }
+
+          if (this.marineSnow) {
+            this.marineSnow.update(t, dt);
+          }
+
+          if (this.shark) {
+            this.shark.update(t, dt);
+          }
+
+          if (this.godRays) {
+            this.godRays.update(t);
+          }
+
+          this.updateHandTracking(t);
+
+          if (this.flashlight) {
+            if (this.handActive) {
+              this.flashlight.setPose(this.handPos);
+            } else if (xb.core.camera) {
+              const cam = xb.core.camera;
+              const fwd = new THREE.Vector3(0.18, -0.15, -0.3).applyQuaternion(cam.quaternion);
+              this.flashlight.setPose(cam.position.clone().add(fwd), cam.quaternion);
+            }
+          }
+
+          this.updateBubbles(dt);
+          this.updateFoodPellets(dt);
+          this.updateBoids(t, dt);
+
+          if (xb.core.camera) {
+            const cam = xb.core.camera;
+            const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(cam.quaternion);
+            const up = new THREE.Vector3(0, 1, 0).applyQuaternion(cam.quaternion);
+            audioEngine.updateListenerPose(cam.position, fwd, up);
+
+            if (this.viewfinder) {
+              this.updateViewfinderScanner(cam);
+            }
+          }
+        }
+
+        updateViewfinderScanner(cam) {
+          if (!this.cameraModeActive || !this.viewfinder) return;
+
+          const camPos = cam.position;
+          const camDir = new THREE.Vector3(0, 0, -1).applyQuaternion(cam.quaternion);
+          let bestCandidate = null;
+          let bestScore = 0.86; // Minimum alignment dot product
+
+          // 1. Check Shark Target
+          if (this.shark) {
+            const sharkPos = this.shark.headPos;
+            const toShark = sharkPos.clone().sub(camPos);
+            const dist = toShark.length();
+            if (dist < 4.5) {
+              const dot = toShark.normalize().dot(camDir);
+              if (dot > bestScore) {
+                bestScore = dot;
+                bestCandidate = {
+                  pos: sharkPos,
+                  name: 'BLACKTIP REEF SHARK',
+                  family: 'Carcharhinidae (Apex Predator)',
+                  length: '1.42 m',
+                  health: '99.4%',
+                  speed: `${(this.shark.swimSpeed * 1.5).toFixed(1)} m/s`,
+                  scale: 1.8
+                };
+              }
+            }
+          }
+
+          // 2. Check Tabletop Coral Reefs
+          const reefs = [
+            { pos: new THREE.Vector3(-1.7, -0.55, -1.8), name: 'ACROPORA TABLETOP REEF' },
+            { pos: new THREE.Vector3(1.7, -0.55, -1.8), name: 'PORITES CORAL FORMATION' }
+          ];
+          for (let r = 0; r < reefs.length; r++) {
+            const toReef = reefs[r].pos.clone().sub(camPos);
+            const dist = toReef.length();
+            if (dist < 3.8) {
+              const dot = toReef.normalize().dot(camDir);
+              if (dot > bestScore) {
+                bestScore = dot;
+                bestCandidate = {
+                  pos: reefs[r].pos,
+                  name: reefs[r].name,
+                  family: 'Scleractinia (Stony Coral)',
+                  length: '1.20 m',
+                  health: '98.1%',
+                  speed: '0.0 m/s',
+                  scale: 1.4
+                };
+              }
+            }
+          }
+
+          // 3. Check Nearest Fish in active school
+          const sampleCount = Math.min(80, this.activeFishCount);
+          const fPos = new THREE.Vector3();
+          for (let i = 0; i < sampleCount; i++) {
+            fPos.set(this.positions[i * 3], this.positions[i * 3 + 1], this.positions[i * 3 + 2]);
+            const toFish = fPos.clone().sub(camPos);
+            const dist = toFish.length();
+            if (dist < 3.2 && dist > 0.3) {
+              const dot = toFish.normalize().dot(camDir);
+              if (dot > bestScore) {
+                bestScore = dot;
+                const isMackerel = (i < Math.floor(this.activeFishCount * 0.6));
+                bestCandidate = {
+                  pos: fPos.clone(),
+                  name: isMackerel ? 'ATLANTIC MACKEREL' : 'YELLOWTAIL CORAL TANG',
+                  family: isMackerel ? 'Scombridae (Fast Pelagic)' : 'Acanthuridae (Reef Grazer)',
+                  length: isMackerel ? '28.4 cm' : '19.2 cm',
+                  health: `${(96.0 + Math.sin(i) * 3.5).toFixed(1)}%`,
+                  speed: `${(this.speeds[i] || 1.8).toFixed(1)} m/s`,
+                  scale: isMackerel ? 0.75 : 0.85
+                };
+              }
+            }
+          }
+
+          if (bestCandidate) {
+            this.viewfinder.lockTarget(bestCandidate);
+          } else {
+            this.viewfinder.clearTarget();
+          }
+
+          this.viewfinder.updatePose(camPos, cam.quaternion);
+        }
+
+        updateHandTracking(t) {
+          this.handActive = false;
+
+          // 1. Direct XR Hand Joints (Index, Thumb, Palm)
+          if (xb.core.user && xb.core.user.hands && xb.core.user.hands.length > 0) {
+            const hand = xb.core.user.hands[0];
+            if (hand && hand.joints && hand.joints.length >= 10) {
+              const indexTip = hand.joints[8];
+              const thumbTip = hand.joints[4];
+
+              if (indexTip && indexTip.position) {
+                this.handVelocity.copy(indexTip.position).sub(this.lastHandPos).divideScalar(0.016);
+                this.handPos.copy(indexTip.position);
+                this.lastHandPos.copy(indexTip.position);
+                this.handActive = true;
+              }
+
+              // Index to Thumb Pinch gesture for dynamic pellet flicking
+              if (indexTip && thumbTip && indexTip.position && thumbTip.position) {
+                const pinchDist = indexTip.position.distanceTo(thumbTip.position);
+                if (pinchDist < 0.025 && !this.wasPinching) {
+                  this.wasPinching = true;
+                  if (this.ecologyMode === 'feed') {
+                    const flickVel = this.handVelocity.clone().multiplyScalar(0.8);
+                    this.spawnFoodPellet(indexTip.position.clone(), flickVel);
+                  } else if (this.ecologyMode === 'camera') {
+                    this.captureSpecimenSnapshot();
+                  }
+                } else if (pinchDist >= 0.035) {
+                  this.wasPinching = false;
+                }
+              }
+
+              // Palm Forward Wave Repulsion
+              if (this.handVelocity.length() > 2.2) {
+                audioEngine.playScatterWhoosh(this.handPos);
+              }
+            }
+          }
+
+          // 2. Two-Handed Biome Scaling Gesture (xb-add-interactions)
+          if (xb.core.user && xb.core.user.hands && xb.core.user.hands.length >= 2) {
+            const h0 = xb.core.user.hands[0];
+            const h1 = xb.core.user.hands[1];
+            if (h0.joints && h1.joints && h0.joints[8] && h1.joints[8] && h0.joints[4] && h1.joints[4]) {
+              const p0 = h0.joints[8].position;
+              const t0 = h0.joints[4].position;
+              const p1 = h1.joints[8].position;
+              const t1 = h1.joints[4].position;
+              if (p0 && t0 && p1 && t1) {
+                const pinch0 = p0.distanceTo(t0) < 0.035;
+                const pinch1 = p1.distanceTo(t1) < 0.035;
+                if (pinch0 && pinch1) {
+                  const distHands = p0.distanceTo(p1);
+                  if (this.lastTwoHandDist > 0) {
+                    const delta = distHands - this.lastTwoHandDist;
+                    const newScale = Math.max(0.35, Math.min(2.5, this.scale.x + delta * 1.8));
+                    this.setBiomeScale(newScale);
+                  }
+                  this.lastTwoHandDist = distHands;
+                } else {
+                  this.lastTwoHandDist = 0;
+                }
+              }
+            }
+          } else {
+            this.lastTwoHandDist = 0;
+          }
+
+          // 3. Controller Fallback
+          if (!this.handActive && xb.core.input.controllers && xb.core.input.controllers.length > 0) {
+            const ctrl = xb.core.input.controllers[0];
+            if (ctrl && ctrl.position) {
+              this.handPos.copy(ctrl.position);
+              this.handActive = true;
+
+              if (ctrl.userData && ctrl.userData.selected && !this.wasSelected) {
+                this.wasSelected = true;
+                if (this.ecologyMode === 'feed') {
+                  this.spawnFoodPellet(ctrl.position.clone());
+                } else if (this.ecologyMode === 'camera') {
+                  this.captureSpecimenSnapshot();
+                }
+              } else if (ctrl.userData && !ctrl.userData.selected) {
+                this.wasSelected = false;
+              }
+            }
+          }
+        }
+
+        updateBubbles(dt) {
+          if (!this.bubbleSystem) return;
+          const pos = this.bubbleSystem.geometry.attributes.position;
+          for (let i = 0; i < pos.count; i++) {
+            let y = pos.getY(i) + dt * 0.6;
+            if (y > 3.0) y = -2.8;
+            pos.setY(i, y);
+            pos.setX(i, pos.getX(i) + Math.sin(y * 4.0) * 0.003);
+          }
+          pos.needsUpdate = true;
+        }
+
+        updateFoodPellets(dt) {
+          for (let i = this.foodPellets.length - 1; i >= 0; i--) {
+            const pellet = this.foodPellets[i];
+            pellet.life -= dt;
+            pellet.vel.y -= dt * 0.1;
+            pellet.vel.multiplyScalar(0.98);
+            pellet.pos.addScaledVector(pellet.vel, dt);
+
+            if (pellet.pos.y < -2.6) {
+              pellet.pos.y = -2.6;
+              pellet.vel.set(0, 0, 0);
+            }
+
+            if (pellet.life <= 0) {
+              this.remove(pellet.mesh);
+              this.foodPellets.splice(i, 1);
+            }
+          }
+        }
+
+        updateBoids(t, dt) {
+          const N = this.activeFishCount;
+          const pos = this.positions;
+          const vel = this.velocities;
+
+          const schoolGoal = new THREE.Vector3(
+            Math.sin(t * 0.25) * 4.2,
+            -0.4 + Math.sin(t * 0.35) * 0.7,
+            Math.cos(t * 0.2) * 3.8 - 1.5
+          );
+
+          const isAttracting = (this.ecologyMode === 'attract') || (this.handActive && this.ecologyMode === 'attract');
+          const isScattering = (this.ecologyMode === 'scatter') || (this.handActive && this.handVelocity.length() > 2.0);
+
+          const curPos = new THREE.Vector3();
+          const curVel = new THREE.Vector3();
+          const force = new THREE.Vector3();
+          const diff = new THREE.Vector3();
+
+          const { cruiseSpeed, cohesionWeight, separationWeight, avoidanceForce } = this.boidsParams;
+
+          // Tabletop reef grazing centers
+          const reefA = new THREE.Vector3(-1.7, -0.4, -1.8);
+          const reefB = new THREE.Vector3(1.7, -0.4, -1.8);
+
+          for (let i = 0; i < N; i++) {
+            const i3 = i * 3;
+            curPos.set(pos[i3], pos[i3 + 1], pos[i3 + 2]);
+            curVel.set(vel[i3], vel[i3 + 1], vel[i3 + 2]);
+            force.set(0, 0, 0);
+
+            // 1. Primary Schooling & Alignment Flow
+            diff.subVectors(schoolGoal, curPos);
+            const distToGoal = diff.length();
+            if (distToGoal > 0.01) {
+              diff.normalize().multiplyScalar(cohesionWeight * 0.4);
+              force.add(diff);
+            }
+
+            // 2. Neighbor Flocking (Separation & Velocity Match)
+            const stride = 4;
+            for (let j = (i + 1) % stride; j < N; j += stride) {
+              if (i === j) continue;
+              const j3 = j * 3;
+              const dx = curPos.x - pos[j3];
+              const dy = curPos.y - pos[j3 + 1];
+              const dz = curPos.z - pos[j3 + 2];
+              const distSq = dx * dx + dy * dy + dz * dz;
+
+              if (distSq < 0.35 && distSq > 0.001) {
+                const sepMag = ((0.35 - distSq) / 0.35) * separationWeight;
+                force.x += (dx / Math.sqrt(distSq)) * sepMag;
+                force.y += (dy / Math.sqrt(distSq)) * sepMag;
+                force.z += (dz / Math.sqrt(distSq)) * sepMag;
+              } else if (distSq < 2.2) {
+                force.x += (vel[j3] - curVel.x) * 0.15;
+                force.y += (vel[j3 + 1] - curVel.y) * 0.15;
+                force.z += (vel[j3 + 2] - curVel.z) * 0.15;
+              }
+            }
+
+            // 3. World Sensing: Tabletop Coral Reef Grazing
+            const distToReefA = curPos.distanceTo(reefA);
+            const distToReefB = curPos.distanceTo(reefB);
+            const nearestReef = (distToReefA < distToReefB) ? reefA : reefB;
+            const distToReef = Math.min(distToReefA, distToReefB);
+
+            if (distToReef < 1.1) {
+              const tangent = new THREE.Vector3(-(curPos.z - nearestReef.z), 0, (curPos.x - nearestReef.x)).normalize();
+              force.addScaledVector(tangent, 0.7);
+              force.y += (nearestReef.y + 0.1 - curPos.y) * 0.6;
+            }
+
+            // 4. World Sensing: Real Room Wall & Boundary Obstacle Avoidance
+            const wallMargin = 0.5;
+            if (curPos.x > 3.8 - wallMargin) force.x -= (curPos.x - (3.8 - wallMargin)) * 4.5;
+            if (curPos.x < -3.8 + wallMargin) force.x += ((-3.8 + wallMargin) - curPos.x) * 4.5;
+            if (curPos.z > 2.2 - wallMargin) force.z -= (curPos.z - (2.2 - wallMargin)) * 4.5;
+            if (curPos.z < -4.2 + wallMargin) force.z += ((-4.2 + wallMargin) - curPos.z) * 4.5;
+            if (curPos.y > 1.6 - wallMargin) force.y -= (curPos.y - (1.6 - wallMargin)) * 3.5;
+            if (curPos.y < -2.2 + wallMargin) force.y += ((-2.2 + wallMargin) - curPos.y) * 4.5;
+
+            // 5. Direct Hand Interaction: Avoidance / Scatter / Attract
+            if (this.handActive) {
+              const distToHand = curPos.distanceTo(this.handPos);
+              if (isScattering && distToHand < 3.2) {
+                diff.subVectors(curPos, this.handPos).normalize();
+                const pushMag = Math.pow(1.0 - (distToHand / 3.2), 2.0) * avoidanceForce * 2.2;
+                force.addScaledVector(diff, pushMag);
+              } else if (isAttracting && distToHand < 4.5) {
+                diff.subVectors(this.handPos, curPos);
+                if (distToHand > 0.45) {
+                  diff.normalize().multiplyScalar(1.6);
+                  force.add(diff);
+                } else {
+                  const tangent = new THREE.Vector3(-diff.z, 0, diff.x).normalize().multiplyScalar(1.2);
+                  force.add(tangent);
+                }
+              } else if (distToHand < 1.2) {
+                diff.subVectors(curPos, this.handPos).normalize();
+                force.addScaledVector(diff, avoidanceForce * (1.2 - distToHand));
+              }
+            }
+
+            // 5B. Apex Predator (Shark) Flash-Expansion & Vacuole Evasion
+            if (this.shark) {
+              const distToShark = curPos.distanceTo(this.shark.headPos);
+              if (distToShark < 2.2) {
+                diff.subVectors(curPos, this.shark.headPos).normalize();
+                const evadeMag = Math.pow(1.0 - (distToShark / 2.2), 2.0) * 8.5;
+                force.addScaledVector(diff, evadeMag);
+
+                // Vacuole maneuver: lateral split around shark heading
+                const sharkForward = this.shark.velocity.clone().normalize();
+                const sideNormal = new THREE.Vector3().crossVectors(sharkForward, new THREE.Vector3(0, 1, 0)).normalize();
+                const sign = (diff.dot(sideNormal) >= 0) ? 1.0 : -1.0;
+                force.addScaledVector(sideNormal, sign * 3.2);
+              }
+            }
+
+            // 6. Food Pellet Hunting Behavior
+            if (this.foodPellets.length > 0) {
+              let nearestPellet = null;
+              let nearestDist = 4.0;
+              for (let f = 0; f < this.foodPellets.length; f++) {
+                const p = this.foodPellets[f];
+                const d = curPos.distanceTo(p.pos);
+                if (d < nearestDist) {
+                  nearestDist = d;
+                  nearestPellet = p;
+                }
+              }
+
+              if (nearestPellet) {
+                diff.subVectors(nearestPellet.pos, curPos).normalize().multiplyScalar(2.8);
+                force.add(diff);
+
+                if (nearestDist < 0.14) {
+                  nearestPellet.life = 0;
+                  audioEngine.playBubblePop(1.5, curPos);
+                }
+              }
+            }
+
+            // Integrate Velocity & Position
+            curVel.addScaledVector(force, dt);
+            
+            const currentSpeed = curVel.length();
+            const maxSpd = isScattering ? (cruiseSpeed * 2.2) : (cruiseSpeed * 1.3);
+            const minSpd = cruiseSpeed * 0.4;
+            if (currentSpeed > maxSpd) {
+              curVel.multiplyScalar(maxSpd / currentSpeed);
+            } else if (currentSpeed < minSpd) {
+              curVel.multiplyScalar(minSpd / Math.max(0.01, currentSpeed));
+            }
+
+            curPos.addScaledVector(curVel, dt);
+
+            pos[i3] = curPos.x;
+            pos[i3 + 1] = curPos.y;
+            pos[i3 + 2] = curPos.z;
+            vel[i3] = curVel.x;
+            vel[i3 + 1] = curVel.y;
+            vel[i3 + 2] = curVel.z;
+
+            this.dummy.position.copy(curPos);
+            const dir = curVel.clone().normalize();
+            this.dummy.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
+            this.dummy.scale.setScalar(this.scales[i]);
+            this.dummy.updateMatrix();
+
+            if (i < this.mackerelCount) {
+              this.meshMackerel.setMatrixAt(i, this.dummy.matrix);
+            } else {
+              this.meshTang.setMatrixAt(i - this.mackerelCount, this.dummy.matrix);
+            }
+          }
+
+          this.meshMackerel.instanceMatrix.needsUpdate = true;
+          this.meshTang.instanceMatrix.needsUpdate = true;
+        }
+      }
+
+      // ==========================================
+      // 8. Experience Manager (Pure Oceanic Ecosystem)
+      // ==========================================
+      class ExperienceManager extends xb.Script {
+        constructor() {
+          super();
+          this.currentExperience = null;
+        }
+
+        init() {
+          this.currentExperience = new OceanicEcosystem();
+          this.add(this.currentExperience);
+          xb.initScript(this.currentExperience);
+        }
+      }
+
+      // ==========================================
+      // 9. Global UI Action Bridge
+      // ==========================================
+      let expManagerInstance = null;
+
+      window.setEcologyMode = (mode) => {
+        if (expManagerInstance && expManagerInstance.currentExperience instanceof OceanicEcosystem) {
+          expManagerInstance.currentExperience.ecologyMode = mode;
+        }
+        document.querySelectorAll('[id^="btn-mode-"]').forEach(el => el.classList.remove('active'));
+        const btn = document.getElementById(`btn-mode-${mode}`);
+        if (btn) btn.classList.add('active');
+
+        const label = document.getElementById('active-mode-label');
+        if (label) {
+          label.textContent = `Mode: ${mode.charAt(0).toUpperCase() + mode.slice(1)}`;
+        }
+      };
+
+      window.setBiome = (biome) => {
+        if (expManagerInstance && expManagerInstance.currentExperience instanceof OceanicEcosystem) {
+          expManagerInstance.currentExperience.setBiome(biome);
+        }
+        document.querySelectorAll('[id^="btn-biome-"]').forEach(el => el.classList.remove('active'));
+        const btn = document.getElementById(`btn-biome-${biome}`);
+        if (btn) btn.classList.add('active');
+      };
+
+      window.setFishDensity = (val) => {
+        const count = parseInt(val, 10);
+        const disp = document.getElementById('fish-count-display');
+        if (disp) disp.textContent = count;
+        if (expManagerInstance && expManagerInstance.currentExperience instanceof OceanicEcosystem) {
+          expManagerInstance.currentExperience.setFishCount(count);
+        }
+      };
+
+      window.toggleSpatialAnchors = () => {
+        if (expManagerInstance && expManagerInstance.currentExperience instanceof OceanicEcosystem) {
+          expManagerInstance.currentExperience.toggleSpatialAnchors();
+        }
+      };
+
+      window.toggleDiveFlashlight = () => {
+        if (expManagerInstance && expManagerInstance.currentExperience instanceof OceanicEcosystem) {
+          const eco = expManagerInstance.currentExperience;
+          if (eco.flashlight) {
+            const on = eco.flashlight.toggle();
+            const btn = document.getElementById('btn-flashlight-toggle');
+            if (btn) {
+              btn.classList.toggle('active', on);
+              btn.style.color = on ? '#38bdf8' : '#64748b';
+            }
+          }
+        }
+      };
+
+      window.toggleVoiceNarration = () => {
+        const isEnabled = naturalistVoice.toggle();
+        const btn = document.getElementById('btn-voice-toggle');
+        if (btn) {
+          btn.classList.toggle('active-voice', isEnabled);
+          btn.style.color = isEnabled ? '#c084fc' : '#64748b';
+        }
+      };
+
+      window.toggleAudio = () => {
+        const isMuted = audioEngine.toggleMute();
+        const btn = document.getElementById('btn-audio-toggle');
+        if (btn) {
+          btn.classList.toggle('active', !isMuted);
+          btn.style.color = isMuted ? '#64748b' : '#38bdf8';
+        }
+      };
+
+      window.askNaturalist = (question) => {
+        if (expManagerInstance && expManagerInstance.currentExperience instanceof OceanicEcosystem) {
+          if (expManagerInstance.currentExperience.triggerAIQuestion) {
+            expManagerInstance.currentExperience.triggerAIQuestion(question);
+          }
+        }
+      };
+
+      window.capturePhoto = () => {
+        if (expManagerInstance && expManagerInstance.currentExperience instanceof OceanicEcosystem) {
+          expManagerInstance.currentExperience.captureSpecimenSnapshot();
+        }
+      };
+
+      window.setBiomeScale = (val) => {
+        const sc = parseFloat(val);
+        if (expManagerInstance && expManagerInstance.currentExperience instanceof OceanicEcosystem) {
+          expManagerInstance.currentExperience.setBiomeScale(sc);
+        }
+      };
+
+      window.toggleMicInput = () => {
+        if (naturalistMic) naturalistMic.toggle();
+      };
+
+      // Desktop keyboard shortcut 'C' for research photo shutter
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'c' || e.key === 'C') {
+          window.capturePhoto();
+        }
+      });
+
+      // Initialize xrblocks with Depth Occlusion & Spatial Anchors enabled
+      document.addEventListener('DOMContentLoaded', () => {
+        const options = new xb.Options();
+
+        // Enable Depth Sensing & Mesh Occlusion (xb-add-world-sensing)
+        if (options.enableDepth) {
+          options.enableDepth();
+        }
+        if (options.reticles) {
+          options.reticles.projectOnDepthMesh = true;
+        }
+
+        // Enable Spatial Anchors & Persistence (xb-anchors)
+        if (options.world && options.world.enableAnchors) {
+          options.world.enableAnchors();
+          if (options.world.enableAnchorPersistence) {
+            options.world.enableAnchorPersistence();
+          }
+        }
+
+        if (options.simulator && xb.SimulatorMode) {
+          options.simulator.defaultMode = xb.SimulatorMode.USER;
+        }
+
+        expManagerInstance = new ExperienceManager();
+        xb.add(expManagerInstance);
+        xb.init(options);
+      });
+    </script>
+  </body>
+</html>

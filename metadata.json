@@ -1,0 +1,5 @@
+{
+  "name": "Remix School of Fish AR",
+  "description": "A dynamic school of fish that swims around you and avoids your hands.",
+  "requestFramePermissions": []
+}
